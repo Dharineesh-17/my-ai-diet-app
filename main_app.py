@@ -29,17 +29,16 @@ if generate_btn:
         st.image("https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=2053", 
          use_container_width=True)
         # --- VISUAL MEAL PREVIEW ---
+# --- AUTO-GENERATING MEAL IMAGE ---
     st.divider()
-    st.subheader("📸 AI Meal Inspiration")
+    st.subheader("📸 Your Daily Meal Inspiration")
     
-    # We create a button to generate the image separately to save tokens
-    if st.button("🎨 See My Meal Preview", key="meal_image_btn"):
-        with st.spinner("AI is plating your meal..."):
-            # This generates a high-quality food image based on the user's goal
-            st.image(f"https://loremflickr.com/800/600/healthy,food,{goal.replace(' ', '')}", 
-                     caption=f"A delicious example of a {goal} meal",
-                     use_container_width=True)
-            st.info("Visualizing your meals helps with portion control and staying motivated!")
+    # This uses your 'goal' variable to find a perfect matching photo automatically!
+    search_term = goal.replace(" ", "")
+    st.image(f"https://loremflickr.com/800/600/healthy,food,{search_term}", 
+             caption=f"AI-Selected {goal} Inspiration",
+             use_container_width=True)
+    st.info("💡 Pro Tip: Plate your food like this to feel more satisfied!")
 # --- NEW FUNCTION FOR DAY 4 ---
 def create_pdf(text):
     pdf = FPDF()
