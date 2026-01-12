@@ -31,21 +31,20 @@ if generate_btn:
     # ... (all your other code) ...
     
     # --- SMART SHOPPING LIST SECTION ---
+  if generate_btn:
+    st.write(f"Generating your {goal} plan...")
+    
+    # ... (Your existing meal plan code) ...
+
+    # --- INDENT THIS WHOLE SECTION BELOW! ---
     st.divider()
     with st.expander("🛒 View Your Smart Shopping List"):
         st.write("Based on your plan, you'll need these essentials:")
-        # This only works if it's indented inside the 'if generate_btn' block!
         shop_prompt = f"List 10 essential grocery items for a {goal} diet."
         shop_response = model.generate_content(shop_prompt)
         st.markdown(shop_response.text)
         st.info("💡 Tip: Check off items as you add them to your cart!")
         # --- VISUAL MEAL PREVIEW ---
-# --- AUTO-GENERATING MEAL IMAGE ---
-    st.divider()
-    st.subheader("📸 Your Daily Meal Inspiration")
-    
-    # This uses your 'goal' variable to find a perfect matching photo automatically!
-    search_term = goal.replace(" ", "")
     st.image(f"https://loremflickr.com/800/600/healthy,food,{search_term}", 
              caption=f"AI-Selected {goal} Inspiration",
              use_container_width=True)
