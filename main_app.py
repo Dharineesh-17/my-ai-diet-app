@@ -26,6 +26,8 @@ if generate_btn:
         st.image("https://loremflickr.com/800/600/healthy,food", 
                  caption="AI-Generated Preview",
                  use_container_width=True)
+        st.image("https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=2053", 
+         use_container_width=True)
 # --- NEW FUNCTION FOR DAY 4 ---
 def create_pdf(text):
     pdf = FPDF()
