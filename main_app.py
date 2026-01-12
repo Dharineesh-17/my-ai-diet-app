@@ -3,6 +3,7 @@ import google.generativeai as genai
 from fpdf import FPDF
 
 # --- 1. APP CONFIGURATION ---
+# This MUST be the first Streamlit command in your script
 st.set_page_config(page_title="AI Health Hub", page_icon="🥗", layout="wide")
 
 # Securely connect to Gemini using your Secrets
@@ -54,12 +55,12 @@ with col2:
         
         with st.spinner("AI is crafting your plan..."):
             # A. Generate Main Diet Plan
-            prompt = f"Create a {duration}-day {goal} plan for {calories:.0f} calories. List meals clearly."
+            prompt = f"Create a {duration}-day {goal} plan for {calories:.0f} calories. List breakfast, lunch, and dinner."
             response = model.generate_content(prompt)
             st.markdown("### 📝 Your Personalized Meal Plan")
             st.markdown(response.text)
             
-            # B. PDF Download Button (Indented!)
+            # B. PDF Download Button (Indented so it only shows after generation)
             pdf_data = create_pdf(response.text)
             st.download_button(
                 label="📥 Download Plan as PDF",
