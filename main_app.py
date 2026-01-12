@@ -28,14 +28,16 @@ if generate_btn:
     # This works now because 'goal' was defined in the sidebar!
     image_prompt = f"A professional food photography shot of a healthy {goal} meal"
     # --- SMART SHOPPING LIST SECTION ---
+  if generate_btn:
+    # ... (all your other code) ...
+    
+    # --- SMART SHOPPING LIST SECTION ---
     st.divider()
     with st.expander("🛒 View Your Smart Shopping List"):
         st.write("Based on your plan, you'll need these essentials:")
-        
-        # We ask the AI specifically for a checklist
-        shop_prompt = f"Based on a {goal} diet, list 10 essential grocery items in a checklist format."
+        # This only works if it's indented inside the 'if generate_btn' block!
+        shop_prompt = f"List 10 essential grocery items for a {goal} diet."
         shop_response = model.generate_content(shop_prompt)
-        
         st.markdown(shop_response.text)
         st.info("💡 Tip: Check off items as you add them to your cart!")
 
