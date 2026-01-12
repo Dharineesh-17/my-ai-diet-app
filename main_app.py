@@ -1,3 +1,4 @@
+import streamlit as st
 from fpdf import FPDF
 import base64
 st.set_page_config(
