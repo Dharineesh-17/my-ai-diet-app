@@ -1,6 +1,10 @@
 from fpdf import FPDF
 import base64
-
+st.set_page_config(
+    page_title="AI Health Hub",
+    page_icon="🥗", # You can use an emoji or a URL to a custom logo!
+    layout="wide"
+)
 # --- NEW FUNCTION FOR DAY 4 ---
 def create_pdf(text):
     pdf = FPDF()
