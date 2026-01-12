@@ -1,7 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
 from fpdf import FPDF
-import base64
 
 # --- 1. APP CONFIGURATION ---
 st.set_page_config(page_title="AI Health Hub", page_icon="🥗", layout="wide")
@@ -86,9 +85,4 @@ with col2:
                      caption=f"AI-Selected {goal} Inspiration",
                      use_container_width=True)
     else:
-        # Welcome message before button is clicked
         st.info("Enter your stats on the left and click 'Generate My Plan' to begin!")
-        with st.expander("💡 Pro Health Tips"):
-            st.write("🏃 **Cardio:** Aim for 30 mins of zone 2 cardio today.")
-            st.write("😴 **Sleep:** 7-9 hours is just as important as your diet.")
-            st.write("🧂 **Sodium:** Keep it under 2300mg to avoid bloating.")
