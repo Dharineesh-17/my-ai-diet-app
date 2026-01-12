@@ -24,7 +24,6 @@ if generate_btn:
     # --- YOUR NEW IMAGE SECTION (Indented!) ---
     st.divider()
     st.subheader("📸 Visual Meal Guide")
-    
     # This works now because 'goal' was defined in the sidebar!
     image_prompt = f"A professional food photography shot of a healthy {goal} meal"
     # --- SMART SHOPPING LIST SECTION ---
@@ -32,21 +31,15 @@ if generate_btn:
     
     # --- SMART SHOPPING LIST SECTION ---
                  st.write(f"Generating your {goal} plan...")
-                 st.divider()
-                 with st.expander("🛒 View Your Smart Shopping List"):
-                 st.write("Based on your plan, you'll need these essentials:")
-                 shop_prompt = f"List 10 essential grocery items for a {goal} diet."
-                 shop_response = model.generate_content(shop_prompt)
-                st.markdown(shop_response.text)
-            st.info("💡 Tip: Check off items as you add them to your cart!")
-        pdf = FPDF()
+                     st.divider()
+                     with st.expander("🛒 View Your Smart Shopping List"):
+                     st.write("Based on your plan, you'll need these essentials:")
+                     shop_prompt = f"List 10 essential grocery items for a {goal} diet."
+                     shop_response = model.generate_content(shop_prompt)
+                    st.markdown(shop_response.text)
+                st.info("💡 Tip: Check off items as you add them to your cart!")
+            pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        # This cleans the AI text so it doesn't break the PDF
-        clean_text = text.encode('latin-1', 'ignore').decode('latin-1')
-        pdf.multi_cell(0, 10, txt=clean_text)
-        return pdf.output(dest="S").encode("latin-1")
-    
     # ... (Keep your existing AI logic here) ...
     import streamlit as st
     import google.generativeai as genai
@@ -55,15 +48,15 @@ import base64
 
 # --- 1. PDF HELPER FUNCTION ---
 def create_pdf(text):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    clean_text = text.encode('latin-1', 'ignore').decode('latin-1')
-    pdf.multi_cell(0, 10, txt=clean_text)
-    return pdf.output(dest="S").encode("latin-1")
-# Add this inside your 'with col1:' block
-st.divider()
-st.header("💧 Hydration Tracker")
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", size=12)
+            clean_text = text.encode('latin-1', 'ignore').decode('latin-1')
+            pdf.multi_cell(0, 10, txt=clean_text)
+            return pdf.output(dest="S").encode("latin-1")
+        # Add this inside your 'with col1:' block
+        st.divider()
+        st.header("💧 Hydration Tracker")
 water_goal = st.number_input("Daily Goal (Liters)", 1.0, 5.0, 2.5)
 current_water = st.slider("Water Consumed today", 0.0, water_goal, 0.0, step=0.25)
 
@@ -101,7 +94,6 @@ with col2:
     if generate_btn:
         # Math for Calories
         calories = (10 * weight) + (6.25 * height) - (5 * age) + 5
-        
         with st.spinner("AI is crafting your plan..."):
             prompt = f"Create a {duration}-day {goal} plan for {calories:.0f} calories."
             response = model.generate_content(prompt)
