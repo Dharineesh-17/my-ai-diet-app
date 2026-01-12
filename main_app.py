@@ -31,37 +31,25 @@ if generate_btn:
     # ... (all your other code) ...
     
     # --- SMART SHOPPING LIST SECTION ---
-  if generate_btn:
-    st.write(f"Generating your {goal} plan...")
+                 st.write(f"Generating your {goal} plan...")
+                 st.divider()
+                 with st.expander("🛒 View Your Smart Shopping List"):
+                 st.write("Based on your plan, you'll need these essentials:")
+                 shop_prompt = f"List 10 essential grocery items for a {goal} diet."
+                 shop_response = model.generate_content(shop_prompt)
+                st.markdown(shop_response.text)
+            st.info("💡 Tip: Check off items as you add them to your cart!")
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        # This cleans the AI text so it doesn't break the PDF
+        clean_text = text.encode('latin-1', 'ignore').decode('latin-1')
+        pdf.multi_cell(0, 10, txt=clean_text)
+        return pdf.output(dest="S").encode("latin-1")
     
-    # ... (Your existing meal plan code) ...
-
-    # --- INDENT THIS WHOLE SECTION BELOW! ---
-    st.divider()
-    with st.expander("🛒 View Your Smart Shopping List"):
-        st.write("Based on your plan, you'll need these essentials:")
-        shop_prompt = f"List 10 essential grocery items for a {goal} diet."
-        shop_response = model.generate_content(shop_prompt)
-        st.markdown(shop_response.text)
-        st.info("💡 Tip: Check off items as you add them to your cart!")
-        # --- VISUAL MEAL PREVIEW ---
-    st.image(f"https://loremflickr.com/800/600/healthy,food,{search_term}", 
-             caption=f"AI-Selected {goal} Inspiration",
-             use_container_width=True)
-    st.info("💡 Pro Tip: Plate your food like this to feel more satisfied!")
-# --- NEW FUNCTION FOR DAY 4 ---
-def create_pdf(text):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    # This cleans the AI text so it doesn't break the PDF
-    clean_text = text.encode('latin-1', 'ignore').decode('latin-1')
-    pdf.multi_cell(0, 10, txt=clean_text)
-    return pdf.output(dest="S").encode("latin-1")
-
-# ... (Keep your existing AI logic here) ...
-import streamlit as st
-import google.generativeai as genai
+    # ... (Keep your existing AI logic here) ...
+    import streamlit as st
+    import google.generativeai as genai
 from fpdf import FPDF
 import base64
 
