@@ -6,24 +6,26 @@ st.set_page_config(
     page_icon="🥗", # You can use an emoji or a URL to a custom logo!
     layout="wide"
 )
-if generate_btn:
-    # ... (Your existing AI text generation code) ...
-    response = model.generate_content(prompt)
-    st.markdown(response.text)
+# 1. CREATE THE BUTTON FIRST
+with st.sidebar:
+    goal = st.selectbox("Your Goal", ["Weight Loss", "Muscle Gain", "Maintenance"])
+    generate_btn = st.button("Generate My Plan")
 
-    # --- NEW IMAGE GENERATION SECTION (PUSHED TO THE RIGHT) ---
+# 2. RUN THE LOGIC ONLY AFTER BUTTON IS CLICKED
+if generate_btn:
+    st.write(f"Generating your {goal} plan...")
+    
+    # --- YOUR NEW IMAGE SECTION (Indented!) ---
     st.divider()
     st.subheader("📸 Visual Meal Guide")
-
-    # Now {goal} works because we are inside the button click!
+    
+    # This works now because 'goal' was defined in the sidebar!
     image_prompt = f"A professional food photography shot of a healthy {goal} meal"
 
     if st.button("🎨 Generate Meal Preview"):
-        with st.spinner("AI Chef is plating your meal..."):
-            st.image("https://loremflickr.com/800/600/healthy,food", 
-                     caption="AI-Generated Preview of Your Meal",
-                     use_container_width=True)
-            st.info("Tip: This visual helps with portion control and plating!")
+        st.image("https://loremflickr.com/800/600/healthy,food", 
+                 caption="AI-Generated Preview",
+                 use_container_width=True)
 # --- NEW FUNCTION FOR DAY 4 ---
 def create_pdf(text):
     pdf = FPDF()
