@@ -1,6 +1,12 @@
 import streamlit as st
+import google.generativeai as genai
 from fpdf import FPDF
 import base64
+# --- API SETUP ---
+genai.configure(api_key=st.secrets["GOOGLE_API_KEY"]) 
+model = genai.GenerativeModel('gemini-1.5-flash')
+
+# ... (Everything else goes below this)
 st.set_page_config(
     page_title="AI Health Hub",
     page_icon="🥗", # You can use an emoji or a URL to a custom logo!
