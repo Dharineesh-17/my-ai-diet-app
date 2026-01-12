@@ -39,13 +39,6 @@ if generate_btn:
         shop_response = model.generate_content(shop_prompt)
         st.markdown(shop_response.text)
         st.info("💡 Tip: Check off items as you add them to your cart!")
-
-    if st.button("🎨 Generate Meal Preview"):
-        st.image("https://loremflickr.com/800/600/healthy,food", 
-                 caption="AI-Generated Preview",
-                 use_container_width=True)
-        st.image("https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=2053", 
-         use_container_width=True)
         # --- VISUAL MEAL PREVIEW ---
 # --- AUTO-GENERATING MEAL IMAGE ---
     st.divider()
