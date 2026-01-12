@@ -1,9 +1,8 @@
 import streamlit as st
 import google.generativeai as genai
 from fpdf import FPDF
-import base64
 
-# --- 1. APP CONFIG (Must be at the very top!) ---
+# --- 1. APP CONFIG (Must be at the very top) ---
 st.set_page_config(page_title="AI Health Hub", page_icon="🥗", layout="wide")
 
 # --- 2. PDF HELPER FUNCTION ---
@@ -17,7 +16,6 @@ def create_pdf(text):
     return pdf.output(dest="S").encode("latin-1")
 
 # --- 3. AI CONFIGURATION ---
-# Using Secrets is safer, but I used your key here to get you running immediately
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 model = genai.GenerativeModel('gemini-1.5-flash')
 
@@ -36,50 +34,42 @@ with col1:
         goal = st.selectbox("Your Goal", ["Weight Loss", "Muscle Gain", "Maintenance"])
         generate_btn = st.button("Generate My Plan", use_container_width=True)
 
-    # --- Hydration Tracker ---
+    # Hydration Tracker
     st.divider()
     st.header("💧 Hydration Tracker")
-    water_goal = st.number_input("Daily Goal (Liters)", 1.0, 5.0, 2.5)
-    current_water = st.slider("Water Consumed today", 0.0, water_goal, 0.0, step=0.25)
-    progress = current_water / water_goal
-    st.progress(progress)
-    if progress >= 1.0:
-        st.balloons()
-        st.success("Goal Reached!")
+    water_goal = st.number_input("Daily Goal (L)", 1.0, 5.0, 2.5)
+    current_water = st.slider("Water Consumed", 0.0, water_goal, 0.0, step=0.25)
+    st.progress(current_water / water_goal)
 
 with col2:
     if generate_btn:
-        # Math for Calories
+        # Step 1: Calculate and Generate
         calories = (10 * weight) + (6.25 * height) - (5 * age) + 5
-        
         with st.spinner("AI is crafting your plan..."):
-            # STEP 1: AI generates the plan
-            prompt = f"Create a {duration}-day {goal} plan for {calories:.0f} calories. List meals clearly."
-            response = model.generate_content(prompt) 
+            prompt = f"Create a {duration}-day {goal} plan for {calories:.0f} calories."
+            response = model.generate_content(prompt)
             st.markdown("### 📝 Your Personalized Meal Plan")
             st.markdown(response.text)
             
-            # STEP 2: PDF Generation (Inside the button logic!)
-            pdf_data = create_pdf(response.text) 
+            # Step 2: PDF Download (This waits for the response!)
+            pdf_data = create_pdf(response.text)
             st.download_button(
                 label="📥 Download Plan as PDF",
                 data=pdf_data,
-                file_name="my_diet_plan.pdf",
+                file_name="diet_plan.pdf",
                 mime="application/pdf",
                 use_container_width=True
             )
             
-            # STEP 3: Smart Shopping List
+            # Step 3: Shopping List
             st.divider()
-            with st.expander("🛒 View Your Smart Shopping List"):
-                shop_prompt = f"List 10 essential grocery items for a {goal} diet."
-                shop_response = model.generate_content(shop_prompt)
-                st.markdown(shop_response.text)
+            with st.expander("🛒 Smart Shopping List"):
+                shop_prompt = f"List 10 items for a {goal} diet."
+                shop_res = model.generate_content(shop_prompt)
+                st.markdown(shop_res.text)
     else:
-        st.info("Enter your stats and click Generate!")
-        
-    # --- Pro Tips ---
+        st.info("Enter stats and click 'Generate'!")
+
+with col2:
     with st.expander("💡 Pro Health Tips"):
-        st.write("🏃 **Cardio:** Aim for 30 mins of zone 2 cardio today.")
-        st.write("😴 **Sleep:** 7-9 hours is just as important as your diet.")
-        st.write("🧂 **Sodium:** Keep it under 2300mg to avoid bloating.")
+        st.write("🏃 Cardio | 😴 Sleep | 🧂 Sodium")
