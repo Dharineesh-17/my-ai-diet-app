@@ -6,6 +6,20 @@ st.set_page_config(
     page_icon="🥗", # You can use an emoji or a URL to a custom logo!
     layout="wide"
 )
+# --- NEW IMAGE GENERATION SECTION ---
+st.divider()
+st.subheader("📸 Visual Meal Guide")
+
+# This creates a specific prompt for the image AI
+image_prompt = f"A professional food photography shot of a healthy {goal} meal, highly detailed, delicious."
+
+if st.button("🎨 Generate Meal Preview"):
+    with st.spinner("AI Chef is plating your meal..."):
+        # We use a placeholder image for now, or connect to an Image API
+        st.image("https://loremflickr.com/800/600/healthy,food", 
+                 caption="AI-Generated Preview of Your Meal",
+                 use_container_width=True)
+        st.info("Tip: This visual helps with portion control and plating!")
 # --- NEW FUNCTION FOR DAY 4 ---
 def create_pdf(text):
     pdf = FPDF()
