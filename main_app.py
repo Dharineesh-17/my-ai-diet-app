@@ -28,7 +28,6 @@ if generate_btn:
     # This works now because 'goal' was defined in the sidebar!
     image_prompt = f"A professional food photography shot of a healthy {goal} meal"
     # --- SMART SHOPPING LIST SECTION ---
-  if generate_btn:
     # ... (all your other code) ...
     
     # --- SMART SHOPPING LIST SECTION ---
