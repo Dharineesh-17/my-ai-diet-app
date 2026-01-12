@@ -17,7 +17,7 @@ def create_pdf(text):
 # --- 3. AI CONFIGURATION (Using Secrets) ---
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    model = genai.GenerativeModel('gemini-1.5-flash')
+  model = genai.GenerativeModel('gemini-pro')
 except Exception as e:
     st.error("API Key missing! Please add it to Streamlit Secrets.")
 
