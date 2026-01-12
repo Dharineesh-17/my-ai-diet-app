@@ -6,20 +6,24 @@ st.set_page_config(
     page_icon="🥗", # You can use an emoji or a URL to a custom logo!
     layout="wide"
 )
-# --- NEW IMAGE GENERATION SECTION ---
-st.divider()
-st.subheader("📸 Visual Meal Guide")
+if generate_btn:
+    # ... (Your existing AI text generation code) ...
+    response = model.generate_content(prompt)
+    st.markdown(response.text)
 
-# This creates a specific prompt for the image AI
-image_prompt = f"A professional food photography shot of a healthy {goal} meal, highly detailed, delicious."
+    # --- NEW IMAGE GENERATION SECTION (PUSHED TO THE RIGHT) ---
+    st.divider()
+    st.subheader("📸 Visual Meal Guide")
 
-if st.button("🎨 Generate Meal Preview"):
-    with st.spinner("AI Chef is plating your meal..."):
-        # We use a placeholder image for now, or connect to an Image API
-        st.image("https://loremflickr.com/800/600/healthy,food", 
-                 caption="AI-Generated Preview of Your Meal",
-                 use_container_width=True)
-        st.info("Tip: This visual helps with portion control and plating!")
+    # Now {goal} works because we are inside the button click!
+    image_prompt = f"A professional food photography shot of a healthy {goal} meal"
+
+    if st.button("🎨 Generate Meal Preview"):
+        with st.spinner("AI Chef is plating your meal..."):
+            st.image("https://loremflickr.com/800/600/healthy,food", 
+                     caption="AI-Generated Preview of Your Meal",
+                     use_container_width=True)
+            st.info("Tip: This visual helps with portion control and plating!")
 # --- NEW FUNCTION FOR DAY 4 ---
 def create_pdf(text):
     pdf = FPDF()
