@@ -21,6 +21,17 @@ if generate_btn:
     
     # This works now because 'goal' was defined in the sidebar!
     image_prompt = f"A professional food photography shot of a healthy {goal} meal"
+    # --- SMART SHOPPING LIST SECTION ---
+    st.divider()
+    with st.expander("🛒 View Your Smart Shopping List"):
+        st.write("Based on your plan, you'll need these essentials:")
+        
+        # We ask the AI specifically for a checklist
+        shop_prompt = f"Based on a {goal} diet, list 10 essential grocery items in a checklist format."
+        shop_response = model.generate_content(shop_prompt)
+        
+        st.markdown(shop_response.text)
+        st.info("💡 Tip: Check off items as you add them to your cart!")
 
     if st.button("🎨 Generate Meal Preview"):
         st.image("https://loremflickr.com/800/600/healthy,food", 
