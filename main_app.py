@@ -8,29 +8,58 @@ st.set_page_config(page_title="AI Health Hub", page_icon="🥗", layout="wide")
 # --- 2. PREMIUM CSS ---
 st.markdown("""
     <style>
-    /* Force METRIC labels (BMR, Water Goal) to be black */
+    /* 1. MAIN BACKGROUND - Clean Off-White */
+    .stApp {
+        background-color: #f0f2f6 !important;
+    }
+
+    /* 2. TEXT COLOR - High Contrast Charcoal */
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown {
+        color: #1a1c23 !important;
+    }
+
+    /* 3. METRIC CARDS - Bold and Clear */
     [data-testid="stMetricLabel"] {
-        color: #1E1E1E !important;
-        font-weight: bold !important;
+        color: #555e6d !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="stMetricValue"] {
+        color: #1a1c23 !important;
+        font-size: 32px !important;
+        font-weight: 800 !important;
+    }
+
+    /* 4. SIDEBAR - Dark Professional look to contrast with Main Page */
+    [data-testid="stSidebar"] {
+        background-color: #1a1c23 !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: #ffffff !important; /* Force sidebar text to be pure white */
+    }
+    [data-testid="stSidebar"] .stTextInput input {
+        color: #1a1c23 !important; /* Keep input text dark so you can see what you type */
+    }
+
+    /* 5. PREMIUM BUTTON - Vibrant Health Blue */
+    div.stButton > button:first-child {
+        background-color: #007bff !important;
+        color: white !important;
+        border-radius: 8px !important;
+        border: none !important;
+        font-weight: 700 !important;
+        padding: 0.6rem 2rem !important;
     }
     
-    /* Force METRIC values (the actual numbers) to be dark gray */
-    [data-testid="stMetricValue"] {
-        color: #333333 !important;
-    }
-
-    /* Force the Sidebar text to be black since it's now on a white background */
-    [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
-        color: #1E1E1E !important;
-    }
-
-    /* Make the button text white since the button background is dark */
-    div.stButton > button:first-child {
-        color: white !important;
+    /* 6. INPUT BOXES - White with subtle shadow */
+    .stNumberInput, .stSelectbox, .stSlider {
+        background-color: white !important;
+        border-radius: 10px !important;
+        padding: 5px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
     </style>
     """, unsafe_allow_html=True)
-
 # --- 3. PDF & AI HELPERS ---
 def create_pdf(text):
     pdf = FPDF()
