@@ -1,6 +1,39 @@
 import streamlit as st
 import google.generativeai as genai
 from fpdf import FPDF
+st.markdown("""
+    <style>
+    /* 1. BOOSTED MAIN HEADER */
+    .big-brand {
+        font-family: 'Helvetica Neue', sans-serif;
+        color: #1a1c23 !important;
+        font-weight: 800 !important;
+        font-size: 55px !important; /* Huge size */
+        letter-spacing: -1.5px !important; /* Modern tight spacing */
+        margin-bottom: 0px !important;
+        padding-top: 20px !important;
+        line-height: 1.1 !important;
+    }
+
+    /* 2. SUBTITLE STYLING */
+    .brand-subtext {
+        color: #555e6d !important;
+        font-size: 20px !important;
+        margin-top: -10px !important;
+        padding-bottom: 30px !important;
+    }
+
+    /* 3. CARD ENHANCEMENT */
+    /* This makes your input boxes look even cleaner against the big title */
+    .stNumberInput, .stSelectbox {
+        border: 1px solid #e0e0e0 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- APPLY THE NEW LARGE TITLE ---
+st.markdown('<h1 class="big-brand">🥗 AI Nutrition & Health Hub</h1>', unsafe_allow_html=True)
+st.markdown('<p class="brand-subtext">Precision health insights powered by Gemini AI</p>', unsafe_allow_html=True)
 
 # --- 1. APP CONFIG (Must be the very first Streamlit command) ---
 st.set_page_config(page_title="AI Health Hub", page_icon="🥗", layout="wide")
