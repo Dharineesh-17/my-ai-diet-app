@@ -26,6 +26,20 @@ st.markdown('<div class="main-header">🥗 AI Nutrition & Health Hub</div>', uns
 # Add a subtle separator or sub-headline
 st.markdown("---")
 st.write("Welcome back! Let's optimize your health with AI-driven insights.")
+# Create three clean columns for the dashboard
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown("### 🏃‍♂️ BMR")
+    st.metric(label="Basal Metabolic Rate", value=f"{bmr} kcal", delta="Daily Base")
+
+with col2:
+    st.markdown("### 🎯 Goal")
+    st.metric(label="Target Intake", value=f"{bmr + 500} kcal", delta="+500 kcal")
+
+with col3:
+    st.markdown("### 💧 Hydration")
+    st.metric(label="Water Intake", value="3.5 Liters", delta="Optimal")
 
 # --- 1. APP CONFIG ---
 st.set_page_config(page_title="AI Health Hub", page_icon="🥗", layout="wide")
