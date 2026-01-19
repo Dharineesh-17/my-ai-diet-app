@@ -34,10 +34,6 @@ st.markdown("""
 # --- APPLY THE NEW LARGE TITLE ---
 st.markdown('<h1 class="big-brand">🥗 AI Nutrition & Health Hub</h1>', unsafe_allow_html=True)
 st.markdown('<p class="brand-subtext">Precision health insights powered by Gemini AI</p>', unsafe_allow_html=True)
-
-# --- 1. APP CONFIG (Must be the very first Streamlit command) ---
-st.set_page_config(page_title="AI Health Hub", page_icon="🥗", layout="wide")
-
 # --- 2. PREMIUM CSS ---
 st.markdown("""
     <style>
