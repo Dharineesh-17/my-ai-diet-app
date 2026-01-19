@@ -26,7 +26,7 @@ def create_pdf(text):
 
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-3-flash-preview')
 except:
     st.error("API Key missing in Secrets!")
 
