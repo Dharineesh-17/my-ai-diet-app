@@ -6,14 +6,33 @@ import streamlit as st
 # 1. PREMIUM CSS (The "White Mode" Look)
 st.markdown("""
     <style>
-    .stApp { background-color: #f8f9fa; }
-    [data-testid="stSidebar"] { background-color: #ffffff; border-right: 1px solid #e0e0e0; }
-    .main-header {
+    /* Main Background */
+    .stApp {
+        background-color: #f8f9fa;
+    }
+    
+    /* Make Title and Subtitles visible */
+    h1, h2, h3, .main-header {
+        color: #1E1E1E !important; /* Force deep dark color */
         font-family: 'Helvetica Neue', sans-serif;
-        color: #1E1E1E;
+    }
+
+    /* Sidebar text color fix */
+    [data-testid="stSidebar"] section {
+        color: #333333 !important;
+    }
+
+    /* Style for the main title class we created */
+    .main-header {
         font-weight: 700;
-        font-size: 32px;
-        padding-bottom: 10px;
+        font-size: 40px;
+        padding-top: 10px;
+        padding-bottom: 5px;
+    }
+    
+    /* Style for normal text to ensure it's not white */
+    .stMarkdown p {
+        color: #444444;
     }
     </style>
     """, unsafe_allow_html=True)
