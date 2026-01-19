@@ -42,13 +42,30 @@ st.write("Optimize your health with AI-driven insights.")
 
 # 3. SIDEBAR INPUTS
 with st.sidebar:
-    st.header("👤 Your Stats")
-    weight = st.number_input("Weight (kg)", value=70)
-    height = st.number_input("Height (cm)", value=175)
-    age = st.number_input("Age", value=25)
-    gender = st.selectbox("Gender", ["Male", "Female"])
-    goal = st.selectbox("Your Goal", ["Weight Loss", "Maintain", "Muscle Gain"])
-    generate_btn = st.button("Generate My Plan")
+    st.markdown("## 👤 User Account")
+    
+    # Simple Login Simulation for the UI
+    if 'logged_in' not in st.session_state:
+        st.session_state.logged_in = False
+
+    if not st.session_state.logged_in:
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        if st.button("Login"):
+            st.session_state.logged_in = True
+            st.rerun()
+    else:
+        st.success("Welcome, Dharineesh!")
+        if st.button("Logout"):
+            st.session_state.logged_in = False
+            st.rerun()
+
+    st.divider() # Visual line
+    
+    st.markdown("## ⚙️ App Settings")
+    st.selectbox("Theme", ["Light Mode", "Dark Mode", "High Contrast"])
+    st.toggle("Enable AI Notifications", value=True)
+    st.toggle("Save Report History", value=False)
 
 # 4. CALCULATION & DASHBOARD (Fixes the NameError)
 # We calculate BMR immediately so the variable 'bmr' exists for the metrics below
