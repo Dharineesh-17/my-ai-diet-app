@@ -1,6 +1,25 @@
 import streamlit as st
 import google.generativeai as genai
 from fpdf import FPDF
+# Add this at the very top of your code after imports
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #f8f9fa;
+    }
+    [data-testid="stSidebar"] {
+        background-color: #ffffff;
+        border-right: 1px solid #e0e0e0;
+    }
+    .main-header {
+        font-family: 'Helvetica Neue', sans-serif;
+        color: #1E1E1E;
+        font-weight: 700;
+        font-size: 32px;
+        padding-bottom: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # --- 1. APP CONFIG ---
 st.set_page_config(page_title="AI Health Hub", page_icon="🥗", layout="wide")
