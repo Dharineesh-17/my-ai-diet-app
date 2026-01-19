@@ -1,5 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
+import json
 from fpdf import FPDF
 st.markdown("""
     <style>
@@ -162,19 +163,49 @@ m2.metric("Daily Target", f"{int(target_cal)} kcal", delta=goal)
 m3.metric("Water Goal", "3.5 L", delta="Optimal")
 
 # 8. GENERATION
-generate_btn = st.button("🚀 Generate My AI Health Plan", use_container_width=True)
+generate_btn = st.button("🚀 Generate AI-NutriCare Plan", use_container_width=True)
 
 if generate_btn:
-    with st.spinner("AI is crafting your plan..."):
+    with st.spinner("AI-NutriCare is analyzing your medical profile..."):
         try:
-            prompt = f"Create a {duration}-day {goal} plan for {target_cal:.0f} calories. Focus on high protein."
-            response = model.generate_content(prompt)
+            # 1. Build the Medical Context
+            if uploaded_file is not None:
+                # Prepare the image/PDF for Gemini
+                file_content = uploaded_file.getvalue()
+                user_context = [
+                    f"""Act as a Clinical Nutritionist. Analyze this report for Blood Sugar, Cholesterol, and BMI. 
+                    Then generate a {duration}-day {goal} diet plan for a {age}yo {gender} weighing {weight}kg.
+                    Adjust the plan if you detect any medical abnormalities in the report.""",
+                    {"mime_type": uploaded_file.type, "data": file_content}
+                ]
+            else:
+                user_context = f"Act as a Clinical Nutritionist. Create a {duration}-day {goal} plan for {target_cal:.0f} calories for a {age}yo {gender}."
+
+            # 2. Call Gemini
+            response = model.generate_content(user_context)
             
+            # 3. Display Results
             with st.container(border=True):
-                st.markdown("### 📋 Your Personalized Report")
+                st.markdown("### 📝 Your Personalized Medical Nutrition Report")
                 st.markdown(response.text)
                 
-                pdf_data = create_pdf(response.text)
-                st.download_button("📥 Download PDF Report", data=pdf_data, file_name="Health_Plan.pdf")
+                # 4. Export Options (PDF and JSON)
+                st.divider()
+                col_pdf, col_json = st.columns(2)
+                
+                with col_pdf:
+                    pdf_data = create_pdf(response.text)
+                    st.download_button("📥 Download PDF Report", data=pdf_data, file_name="Health_Plan.pdf", use_container_width=True)
+                
+                with col_json:
+                    # Create structured JSON data for the mentor's requirement
+                    report_json = {
+                        "patient_biometrics": {"weight": weight, "height": height, "age": age, "gender": gender},
+                        "plan_details": {"goal": goal, "duration": duration, "target_calories": target_cal},
+                        "ai_recommendation": response.text[:1000] # Snippet for JSON
+                    }
+                    json_string = json.dumps(report_json, indent=4)
+                    st.download_button("📥 Download JSON Data", data=json_string, file_name="health_data.json", mime="application/json", use_container_width=True)
+
         except Exception as e:
             st.error(f"AI Error: {e}")
