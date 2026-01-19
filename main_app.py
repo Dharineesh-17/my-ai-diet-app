@@ -6,37 +6,36 @@ import streamlit as st
 # 1. PREMIUM CSS (The "White Mode" Look)
 st.markdown("""
     <style>
-    /* Main Background */
+    /* 1. Fix the main background */
     .stApp {
-        background-color: #f8f9fa;
+        background-color: #f8f9fa !important;
     }
     
-    /* Make Title and Subtitles visible */
-    h1, h2, h3, .main-header {
-        color: #1E1E1E !important; /* Force deep dark color */
-        font-family: 'Helvetica Neue', sans-serif;
+    /* 2. Force ALL text to be dark and visible */
+    h1, h2, h3, p, span, label, .stMarkdown {
+        color: #1E1E1E !important;
     }
 
-    /* Sidebar text color fix */
-    [data-testid="stSidebar"] section {
-        color: #333333 !important;
-    }
-
-    /* Style for the main title class we created */
+    /* 3. Style our specific Premium Header */
     .main-header {
+        font-family: 'Helvetica Neue', sans-serif;
+        color: #1E1E1E;
         font-weight: 700;
-        font-size: 40px;
-        padding-top: 10px;
-        padding-bottom: 5px;
+        font-size: 38px;
+        padding: 20px 0px;
     }
-    
-    /* Style for normal text to ensure it's not white */
-    .stMarkdown p {
-        color: #444444;
+
+    /* 4. Fix sidebar text (it often stays white/ghostly) */
+    [data-testid="stSidebar"] .stMarkdown p, 
+    [data-testid="stSidebar"] label {
+        color: #333333 !important;
+        font-weight: 600;
     }
     </style>
     """, unsafe_allow_html=True)
 
+# NOW ONLY USE THIS ONE TITLE:
+st.markdown('<div class="main-header">🥗 AI Nutrition & Health Hub</div>', unsafe_allow_html=True)
 # 2. HEADER
 st.markdown('<div class="main-header">🥗 AI Nutrition & Health Hub</div>', unsafe_allow_html=True)
 st.write("Optimize your health with AI-driven insights.")
