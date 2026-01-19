@@ -126,10 +126,6 @@ with st.sidebar:
     st.selectbox("Theme", ["Light Mode", "Dark Mode"])
     st.toggle("Enable AI Notifications", value=True)
 
-# --- 5. MAIN PAGE LAYOUT ---
-st.markdown('<div class="main-header">🥗 AI Nutrition & Health Hub</div>', unsafe_allow_html=True)
-st.write("Optimize your health with AI-driven insights.")
-
 # Input Section in Main Page
 st.markdown("### 📊 Your Daily Biometrics")
 with st.container(border=True):
