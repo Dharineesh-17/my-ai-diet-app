@@ -155,7 +155,7 @@ with st.container(border=True):
     """)
 
 # Move the file uploader here for better flow
-uploaded_file = st.sidebar.file_uploader("📤 Upload Medical Report", type=["pdf", "png", "jpg", "jpeg"])
+#uploaded_file = st.sidebar.file_uploader("📤 Upload Medical Report", type=["pdf", "png", "jpg", "jpeg"])
 
 # 6. CALCULATIONS
 if gender == "Male":
