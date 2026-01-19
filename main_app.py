@@ -146,6 +146,16 @@ with st.container(border=True):
     with col_c:
         age = st.number_input("Age", 10, 100, 25)
         duration = st.slider("Plan Duration (Days)", 1, 7, 3)
+        # --- CLINICAL PROBLEM STATEMENT (Requirement from Mentor) ---
+st.markdown("### 🔍 AI-NutriCare Clinical Intelligence")
+with st.container(border=True):
+    st.info("""
+    **Problem:** Medical reports contain complex data (blood sugar, cholesterol, BMI) that patients struggle to interpret. 
+    **Solution:** AI-NutriCare uses NLP to parse your medical reports and generate a diet plan tailored to your specific clinical conditions.
+    """)
+
+# Move the file uploader here for better flow
+uploaded_file = st.sidebar.file_uploader("📤 Upload Medical Report", type=["pdf", "png", "jpg", "jpeg"])
 
 # 6. CALCULATIONS
 if gender == "Male":
@@ -162,57 +172,48 @@ m1.metric("Basal Metabolic Rate", f"{int(bmr)} kcal")
 m2.metric("Daily Target", f"{int(target_cal)} kcal", delta=goal)
 m3.metric("Water Goal", "3.5 L", delta="Optimal")
 
-# 8. GENERATION
-generate_btn = st.button("🚀 Generate AI-NutriCare Plan", use_container_width=True)
+# 8. CLINICAL GENERATION LOGIC
+generate_btn = st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_container_width=True)
 
 if generate_btn:
-    with st.spinner("🔍 AI-NutriCare is parsing medical markers..."):
+    with st.spinner("🏥 Analyzing medical markers and interpreting prescriptions..."):
         try:
-            # Objective: Extract and Analyze (NLP/ML Requirement)
+            # 1. THE CLINICAL PROMPT (Directly addresses image_08c460.png objectives)
+            clinical_instructions = f"""
+            ACT AS A CLINICAL DIETITIAN. 
+            OBJECTIVE: 
+            - Parse report to extract Blood Sugar, Cholesterol, and BMI.
+            - Interpret textual notes/prescriptions for specific conditions.
+            - Generate a {duration}-day diet for a {age}yo {gender} aiming for {goal}.
+            - Provide output with clear medical reasoning.
+            """
+            
             if uploaded_file:
-                # We prompt Gemini to act as a Clinical ML Model
-                file_data = uploaded_file.getvalue()
-                medical_query = [
-                    f"""Analyze this report as a Clinical Nutritionist. 
-                    1. Extract Blood Sugar, BMI, and Cholesterol. 
-                    2. Categorize the health condition (e.g., Diabetic, Hypertensive).
-                    3. Generate a {duration}-day diet for a {age}yo {gender} aiming for {goal}.
-                    4. MUST include medical reasoning for food choices.""",
-                    {"mime_type": uploaded_file.type, "data": file_data}
-                ]
-                response = model.generate_content(medical_query)
+                # Multimodal analysis (Text + Image/PDF)
+                file_content = uploaded_file.getvalue()
+                response = model.generate_content([
+                    clinical_instructions, 
+                    {"mime_type": uploaded_file.type, "data": file_content}
+                ])
             else:
-                # Fallback if no report is provided
-                response = model.generate_content(f"Create a {duration}-day {goal} plan for {target_cal}kcal.")
+                response = model.generate_content(clinical_instructions)
 
-            # --- DISPLAY RESULTS ---
+            # 2. DISPLAY & EXPORT (PDF/HTML/JSON Requirement)
             with st.container(border=True):
                 st.markdown("### 📋 Clinical Nutrition Report")
                 st.markdown(response.text)
                 
-                # Objective: Structured Data Output (JSON/PDF)
                 st.divider()
-                st.subheader("📥 Export for Medical Records")
+                st.subheader("📥 Export Results (Easy Consumption)")
                 c1, c2, c3 = st.columns(3)
                 
-                # PDF Export
                 with c1:
-                    pdf_data = create_pdf(response.text)
-                    st.download_button("💾 Download PDF", data=pdf_data, file_name="Clinical_Plan.pdf", use_container_width=True)
-                
-                # JSON Export (Requirement for 'Easy Consumption')
+                    st.download_button("📄 JSON", data=json.dumps({"data": response.text[:500]}), file_name="report.json", use_container_width=True)
                 with c2:
-                    json_data = {
-                        "patient_profile": {"age": age, "weight": weight, "gender": gender},
-                        "clinical_goals": {"target_calories": target_cal, "goal": goal},
-                        "report_summary": response.text[:500]
-                    }
-                    st.download_button("📄 Download JSON", data=json.dumps(json_data), file_name="patient_data.json", mime="application/json", use_container_width=True)
-                
-                # HTML Export (Fulfills 'PDF/HTML/JSON' objective)
+                    st.download_button("💾 PDF", data=create_pdf(response.text), file_name="report.pdf", use_container_width=True)
                 with c3:
-                    html_report = f"<html><body><h1>Medical Plan</h1><p>{response.text}</p></body></html>"
-                    st.download_button("🌐 Download HTML", data=html_report, file_name="report.html", mime="text/html", use_container_width=True)
+                    html_data = f"<h1>Medical Report</h1><p>{response.text}</p>"
+                    st.download_button("🌐 HTML", data=html_data, file_name="report.html", use_container_width=True)
 
         except Exception as e:
-            st.error(f"Clinical Analysis Failed: {e}")
+            st.error(f"Clinical Analysis Error: {e}")
