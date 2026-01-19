@@ -2,6 +2,18 @@ import streamlit as st
 import google.generativeai as genai
 import json
 from fpdf import FPDF
+import time
+from google.api_core import exceptions
+
+# In your generation logic:
+if generate_btn:
+    try:
+        response = model.generate_content(clinical_instructions)
+        st.markdown(response.text)
+    except exceptions.ResourceExhausted:
+        st.error("⚠️ AI is busy (Rate Limit reached). Please wait 60 seconds and try again.")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
 st.markdown("""
     <style>
     /* 1. BOOSTED MAIN HEADER */
