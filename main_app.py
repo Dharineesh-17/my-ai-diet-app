@@ -20,6 +20,12 @@ st.markdown("""
     }
     </style>
     """, unsafe_allow_html=True)
+# Apply the "Premium" title using the CSS class you just defined
+st.markdown('<div class="main-header">🥗 AI Nutrition & Health Hub</div>', unsafe_allow_html=True)
+
+# Add a subtle separator or sub-headline
+st.markdown("---")
+st.write("Welcome back! Let's optimize your health with AI-driven insights.")
 
 # --- 1. APP CONFIG ---
 st.set_page_config(page_title="AI Health Hub", page_icon="🥗", layout="wide")
