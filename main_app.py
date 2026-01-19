@@ -125,6 +125,12 @@ with st.sidebar:
     st.markdown("## ⚙️ App Settings")
     st.selectbox("Theme", ["Light Mode", "Dark Mode"])
     st.toggle("Enable AI Notifications", value=True)
+    #new addings for medical report 
+    st.markdown("### 📄 Medical Report Analysis")
+    uploaded_file = st.file_uploader("Upload your medical report (PDF or Image)", type=["pdf", "png", "jpg", "jpeg"])
+
+if uploaded_file:
+    st.success("Report uploaded successfully! AI is analyzing your health markers...")
 
 # Input Section in Main Page
 st.markdown("### 📊 Your Daily Biometrics")
