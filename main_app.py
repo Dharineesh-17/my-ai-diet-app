@@ -166,46 +166,53 @@ m3.metric("Water Goal", "3.5 L", delta="Optimal")
 generate_btn = st.button("🚀 Generate AI-NutriCare Plan", use_container_width=True)
 
 if generate_btn:
-    with st.spinner("AI-NutriCare is analyzing your medical profile..."):
+    with st.spinner("🔍 AI-NutriCare is parsing medical markers..."):
         try:
-            # 1. Build the Medical Context
-            if uploaded_file is not None:
-                # Prepare the image/PDF for Gemini
-                file_content = uploaded_file.getvalue()
-                user_context = [
-                    f"""Act as a Clinical Nutritionist. Analyze this report for Blood Sugar, Cholesterol, and BMI. 
-                    Then generate a {duration}-day {goal} diet plan for a {age}yo {gender} weighing {weight}kg.
-                    Adjust the plan if you detect any medical abnormalities in the report.""",
-                    {"mime_type": uploaded_file.type, "data": file_content}
+            # Objective: Extract and Analyze (NLP/ML Requirement)
+            if uploaded_file:
+                # We prompt Gemini to act as a Clinical ML Model
+                file_data = uploaded_file.getvalue()
+                medical_query = [
+                    f"""Analyze this report as a Clinical Nutritionist. 
+                    1. Extract Blood Sugar, BMI, and Cholesterol. 
+                    2. Categorize the health condition (e.g., Diabetic, Hypertensive).
+                    3. Generate a {duration}-day diet for a {age}yo {gender} aiming for {goal}.
+                    4. MUST include medical reasoning for food choices.""",
+                    {"mime_type": uploaded_file.type, "data": file_data}
                 ]
+                response = model.generate_content(medical_query)
             else:
-                user_context = f"Act as a Clinical Nutritionist. Create a {duration}-day {goal} plan for {target_cal:.0f} calories for a {age}yo {gender}."
+                # Fallback if no report is provided
+                response = model.generate_content(f"Create a {duration}-day {goal} plan for {target_cal}kcal.")
 
-            # 2. Call Gemini
-            response = model.generate_content(user_context)
-            
-            # 3. Display Results
+            # --- DISPLAY RESULTS ---
             with st.container(border=True):
-                st.markdown("### 📝 Your Personalized Medical Nutrition Report")
+                st.markdown("### 📋 Clinical Nutrition Report")
                 st.markdown(response.text)
                 
-                # 4. Export Options (PDF and JSON)
+                # Objective: Structured Data Output (JSON/PDF)
                 st.divider()
-                col_pdf, col_json = st.columns(2)
+                st.subheader("📥 Export for Medical Records")
+                c1, c2, c3 = st.columns(3)
                 
-                with col_pdf:
+                # PDF Export
+                with c1:
                     pdf_data = create_pdf(response.text)
-                    st.download_button("📥 Download PDF Report", data=pdf_data, file_name="Health_Plan.pdf", use_container_width=True)
+                    st.download_button("💾 Download PDF", data=pdf_data, file_name="Clinical_Plan.pdf", use_container_width=True)
                 
-                with col_json:
-                    # Create structured JSON data for the mentor's requirement
-                    report_json = {
-                        "patient_biometrics": {"weight": weight, "height": height, "age": age, "gender": gender},
-                        "plan_details": {"goal": goal, "duration": duration, "target_calories": target_cal},
-                        "ai_recommendation": response.text[:1000] # Snippet for JSON
+                # JSON Export (Requirement for 'Easy Consumption')
+                with c2:
+                    json_data = {
+                        "patient_profile": {"age": age, "weight": weight, "gender": gender},
+                        "clinical_goals": {"target_calories": target_cal, "goal": goal},
+                        "report_summary": response.text[:500]
                     }
-                    json_string = json.dumps(report_json, indent=4)
-                    st.download_button("📥 Download JSON Data", data=json_string, file_name="health_data.json", mime="application/json", use_container_width=True)
+                    st.download_button("📄 Download JSON", data=json.dumps(json_data), file_name="patient_data.json", mime="application/json", use_container_width=True)
+                
+                # HTML Export (Fulfills 'PDF/HTML/JSON' objective)
+                with c3:
+                    html_report = f"<html><body><h1>Medical Plan</h1><p>{response.text}</p></body></html>"
+                    st.download_button("🌐 Download HTML", data=html_report, file_name="report.html", mime="text/html", use_container_width=True)
 
         except Exception as e:
-            st.error(f"AI Error: {e}")
+            st.error(f"Clinical Analysis Failed: {e}")
