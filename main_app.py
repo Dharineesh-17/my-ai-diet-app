@@ -36,9 +36,6 @@ st.markdown("""
     }
     </style>
     """, unsafe_allow_html=True)
-
-# NOW ONLY USE THIS ONE TITLE:
-st.markdown('<div class="main-header">🥗 AI Nutrition & Health Hub</div>', unsafe_allow_html=True)
 # 2. HEADER
 st.markdown('<div class="main-header">🥗 AI Nutrition & Health Hub</div>', unsafe_allow_html=True)
 st.write("Optimize your health with AI-driven insights.")
