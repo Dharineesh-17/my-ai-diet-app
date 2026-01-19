@@ -37,50 +37,55 @@ st.markdown('<p class="brand-subtext">Precision health insights powered by Gemin
 # --- 2. PREMIUM CSS ---
 st.markdown("""
     <style>
-    /* 1. ADAPTIVE HEADER - No more 'forced' colors */
-    .big-brand {
-        font-family: 'Helvetica Neue', sans-serif;
+    /* 1. MAIN BACKGROUND - Clean Off-White */
+    .stApp {
+        background-color: #f0f2f6 !important;
+    }
+
+    /* 2. TEXT COLOR - High Contrast Charcoal */
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown {
+        color: #1a1c23 !important;
+    }
+
+    /* 3. METRIC CARDS - Bold and Clear */
+    [data-testid="stMetricLabel"] {
+        color: #555e6d !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="stMetricValue"] {
+        color: #1a1c23 !important;
+        font-size: 32px !important;
         font-weight: 800 !important;
-        font-size: 55px !important;
-        letter-spacing: -1.5px !important;
-        padding-top: 20px !important;
-        /* This variable detects light/dark mode automatically */
-        color: var(--text-color) !important; 
     }
 
-    .brand-subtext {
-        color: var(--text-color);
-        opacity: 0.7;
-        font-size: 20px !important;
-        margin-top: -10px !important;
-        padding-bottom: 30px !important;
-    }
-
-    /* 2. SIDEBAR - Stays Dark for Contrast */
+    /* 4. SIDEBAR - Dark Professional look to contrast with Main Page */
     [data-testid="stSidebar"] {
         background-color: #1a1c23 !important;
     }
     [data-testid="stSidebar"] * {
-        color: #ffffff !important;
+        color: #ffffff !important; /* Force sidebar text to be pure white */
+    }
+    [data-testid="stSidebar"] .stTextInput input {
+        color: #1a1c23 !important; /* Keep input text dark so you can see what you type */
     }
 
-    /* 3. METRIC CARDS - Adaptive Colors */
-    [data-testid="stMetricValue"] {
-        color: var(--text-color) !important;
-        font-weight: 800 !important;
-    }
-    
-    /* 4. INPUT CARD STYLING */
-    .stNumberInput, .stSelectbox {
-        border-radius: 10px !important;
-    }
-
-    /* 5. BUTTON - Always Blue */
+    /* 5. PREMIUM BUTTON - Vibrant Health Blue */
     div.stButton > button:first-child {
         background-color: #007bff !important;
         color: white !important;
         border-radius: 8px !important;
-        width: 100%;
+        border: none !important;
+        font-weight: 700 !important;
+        padding: 0.6rem 2rem !important;
+    }
+    
+    /* 6. INPUT BOXES - White with subtle shadow */
+    .stNumberInput, .stSelectbox, .stSlider {
+        background-color: white !important;
+        border-radius: 10px !important;
+        padding: 5px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
     </style>
     """, unsafe_allow_html=True)
