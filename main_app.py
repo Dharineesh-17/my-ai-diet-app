@@ -8,10 +8,26 @@ st.set_page_config(page_title="AI Health Hub", page_icon="🥗", layout="wide")
 # --- 2. PREMIUM CSS ---
 st.markdown("""
     <style>
-    .stApp { background-color: #f8f9fa; }
-    h1, h2, h3, p, label { color: #1E1E1E !important; }
-    .main-header { font-weight: 700; font-size: 40px; color: #1E1E1E; padding-bottom: 10px; }
-    [data-testid="stSidebar"] { background-color: #ffffff !important; border-right: 1px solid #e0e0e0; }
+    /* Force METRIC labels (BMR, Water Goal) to be black */
+    [data-testid="stMetricLabel"] {
+        color: #1E1E1E !important;
+        font-weight: bold !important;
+    }
+    
+    /* Force METRIC values (the actual numbers) to be dark gray */
+    [data-testid="stMetricValue"] {
+        color: #333333 !important;
+    }
+
+    /* Force the Sidebar text to be black since it's now on a white background */
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
+        color: #1E1E1E !important;
+    }
+
+    /* Make the button text white since the button background is dark */
+    div.stButton > button:first-child {
+        color: white !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
