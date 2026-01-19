@@ -1,45 +1,62 @@
 import streamlit as st
 import google.generativeai as genai
 from fpdf import FPDF
-# Add this at the very top of your code after imports
+import streamlit as st
+
+# 1. PREMIUM CSS (The "White Mode" Look)
 st.markdown("""
     <style>
-    .stApp {
-        background-color: #f8f9fa;
-    }
-    [data-testid="stSidebar"] {
-        background-color: #ffffff;
-        border-right: 1px solid #e0e0e0;
-    }
+    .stApp { background-color: #f8f9fa; }
+    [data-testid="stSidebar"] { background-color: #ffffff; border-right: 1px solid #e0e0e0; }
     .main-header {
         font-family: 'Helvetica Neue', sans-serif;
         color: #1E1E1E;
         font-weight: 700;
         font-size: 32px;
-        padding-bottom: 20px;
+        padding-bottom: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
-# Apply the "Premium" title using the CSS class you just defined
+
+# 2. HEADER
 st.markdown('<div class="main-header">🥗 AI Nutrition & Health Hub</div>', unsafe_allow_html=True)
+st.write("Optimize your health with AI-driven insights.")
 
-# Add a subtle separator or sub-headline
-st.markdown("---")
-st.write("Welcome back! Let's optimize your health with AI-driven insights.")
-# Create three clean columns for the dashboard
+# 3. SIDEBAR INPUTS
+with st.sidebar:
+    st.header("👤 Your Stats")
+    weight = st.number_input("Weight (kg)", value=70)
+    height = st.number_input("Height (cm)", value=175)
+    age = st.number_input("Age", value=25)
+    gender = st.selectbox("Gender", ["Male", "Female"])
+    goal = st.selectbox("Your Goal", ["Weight Loss", "Maintain", "Muscle Gain"])
+    generate_btn = st.button("Generate My Plan")
+
+# 4. CALCULATION & DASHBOARD (Fixes the NameError)
+# We calculate BMR immediately so the variable 'bmr' exists for the metrics below
+if gender == "Male":
+    bmr = 10 * weight + 6.25 * height - 5 * age + 5
+else:
+    bmr = 10 * weight + 6.25 * height - 5 * age - 161
+
+# DISPLAY METRICS
 col1, col2, col3 = st.columns(3)
-
 with col1:
-    st.markdown("### 🏃‍♂️ BMR")
-    st.metric(label="Basal Metabolic Rate", value=f"{bmr} kcal", delta="Daily Base")
-
+    st.metric(label="Basal Metabolic Rate", value=f"{int(bmr)} kcal", delta="Daily Base")
 with col2:
-    st.markdown("### 🎯 Goal")
-    st.metric(label="Target Intake", value=f"{bmr + 500} kcal", delta="+500 kcal")
-
+    target = bmr + 500 if goal == "Muscle Gain" else bmr - 500 if goal == "Weight Loss" else bmr
+    st.metric(label="Target Intake", value=f"{int(target)} kcal", delta=goal)
 with col3:
-    st.markdown("### 💧 Hydration")
-    st.metric(label="Water Intake", value="3.5 Liters", delta="Optimal")
+    st.metric(label="Water Goal", value="3.5 L", delta="Hydration")
+
+# 5. AI REPORT SECTION
+if generate_btn:
+    with st.spinner("AI is crafting your plan..."):
+        # Placeholder for your Gemini API call
+        st.success("Plan Generated!")
+        with st.container(border=True):
+            st.subheader("📋 Personalized Nutrition Report")
+            st.write("Your AI-generated meal plan would appear here...")
 
 # --- 1. APP CONFIG ---
 st.set_page_config(page_title="AI Health Hub", page_icon="🥗", layout="wide")
