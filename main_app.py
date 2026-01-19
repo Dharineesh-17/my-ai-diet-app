@@ -153,10 +153,7 @@ with st.container(border=True):
     **Problem:** Medical reports contain complex data (blood sugar, cholesterol, BMI) that patients struggle to interpret. 
     **Solution:** AI-NutriCare uses NLP to parse your medical reports and generate a diet plan tailored to your specific clinical conditions.
     """)
-
-# Move the file uploader here for better flow
-#uploaded_file = st.sidebar.file_uploader("📤 Upload Medical Report", type=["pdf", "png", "jpg", "jpeg"])
-
+    
 # 6. CALCULATIONS
 if gender == "Male":
     bmr = 10 * weight + 6.25 * height - 5 * age + 5
