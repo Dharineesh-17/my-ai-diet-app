@@ -105,33 +105,36 @@ try:
 except:
     st.error("API Key missing in Secrets!")
 
-# --- 4. SIDEBAR (Login & Settings Only) ---
+# --- 4. SIDEBAR (Clinical Focus) ---
 with st.sidebar:
     st.markdown("## 👤 User Account")
-    if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+    if 'logged_in' not in st.session_state: 
+        st.session_state.logged_in = False
     
     if not st.session_state.logged_in:
         st.text_input("Email")
         st.text_input("Password", type="password")
-        if st.button("Login"):
+        if st.button("Login", use_container_width=True):
             st.session_state.logged_in = True
             st.rerun()
     else:
         st.success("Welcome, Dharineesh!")
-        if st.button("Logout"):
+        if st.button("Logout", use_container_width=True):
             st.session_state.logged_in = False
             st.rerun()
 
     st.divider()
-    st.markdown("## ⚙️ App Settings")
-    st.selectbox("Theme", ["Light Mode", "Dark Mode"])
-    st.toggle("Enable AI Notifications", value=True)
-    #new addings for medical report 
-    st.markdown("### 📄 Medical Report Analysis")
-    uploaded_file = st.file_uploader("Upload your medical report (PDF or Image)", type=["pdf", "png", "jpg", "jpeg"])
-
-if uploaded_file:
-    st.success("Report uploaded successfully! AI is analyzing your health markers...")
+    
+    # NEW: Focused Medical Upload Section
+    st.markdown("### 📄 Clinical Analysis")
+    uploaded_file = st.file_uploader(
+        "Upload Medical Report (PDF/Image)", 
+        type=["pdf", "png", "jpg", "jpeg"],
+        help="Upload blood tests or doctor notes for AI parsing."
+    )
+    
+    if uploaded_file:
+        st.success("Report ready for analysis!")
 
 # Input Section in Main Page
 st.markdown("### 📊 Your Daily Biometrics")
