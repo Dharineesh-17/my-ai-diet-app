@@ -159,6 +159,6 @@ if st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_container_width=Tr
                     st.download_button("🌐 HTML", data=f"<html>{response.text}</html>", file_name="report.html", use_container_width=True)
 
         except exceptions.ResourceExhausted:
-            st.error("⚠️ API limit reached. Wait 60 seconds.")
+            st.error("⚠️ API limit reached. Wait for few moments.")
         except Exception as e:
             st.error(f"Error: {e}")
