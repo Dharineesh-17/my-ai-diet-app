@@ -4,24 +4,34 @@ import json
 from fpdf import FPDF
 from google.api_core import exceptions
 
-# --- 1. PREMIUM CSS ---
+# --- 1. PREMIUM CSS (Black Heading Focus) ---
 st.markdown("""
     <style>
+    /* Force all headings to Black for visibility */
+    h1, h2, h3, h4, h5, h6, .big-brand {
+        color: #000000 !important;
+    }
+    
     .big-brand {
         font-family: 'Helvetica Neue', sans-serif;
-        color: #1a1c23 !important;
         font-weight: 800 !important;
         font-size: 55px !important;
         line-height: 1.1 !important;
     }
+    
     .brand-subtext {
-        color: #555e6d !important;
+        color: #333333 !important;
         font-size: 20px !important;
         padding-bottom: 30px !important;
     }
+
     .stApp { background-color: #f0f2f6 !important; }
+    
+    /* Sidebar Styling */
     [data-testid="stSidebar"] { background-color: #1a1c23 !important; }
     [data-testid="stSidebar"] * { color: #ffffff !important; }
+    
+    /* Input & Button Styling */
     div.stButton > button:first-child {
         background-color: #007bff !important;
         color: white !important;
@@ -40,14 +50,13 @@ def create_pdf(text):
     pdf.multi_cell(0, 10, txt=clean_text)
     return pdf.output(dest="S").encode("latin-1")
 
-# Configure Gemini Model
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
     model = genai.GenerativeModel('gemini-1.5-flash') 
 except Exception as e:
-    st.error(f"API Configuration Error: {e}")
+    st.error(f"API Setup Error: {e}")
 
-# --- 3. SIDEBAR (Login & Report Upload) ---
+# --- 3. SIDEBAR (Clinical Focus) ---
 with st.sidebar:
     st.markdown("## 👤 User Account")
     if 'logged_in' not in st.session_state: st.session_state.logged_in = False
@@ -72,11 +81,10 @@ with st.sidebar:
 st.markdown('<h1 class="big-brand">🥗 AI-NutriCare Hub</h1>', unsafe_allow_html=True)
 st.markdown('<p class="brand-subtext">Precision health insights powered by Gemini AI</p>', unsafe_allow_html=True)
 
-# --- 5. BIOMETRICS & REGIONAL INPUTS ---
-# Fixed: Variables defined BEFORE calculation to avoid NameError
+# --- 5. BIOMETRICS & REGION (Integrated Concept) ---
 st.markdown("### 📊 Your Daily Biometrics & Region")
 with st.container(border=True):
-    col_a, col_b, col_c = st.columns(3)
+    col_a, col_b, col_c = st.columns(3) # Variables created before calculations
     with col_a:
         weight = st.number_input("Weight (kg)", 30, 150, 70)
         gender = st.selectbox("Gender", ["Male", "Female"])
@@ -85,8 +93,8 @@ with st.container(border=True):
         goal = st.selectbox("Goal", ["Weight Loss", "Muscle Gain", "Maintenance"])
     with col_c:
         age = st.number_input("Age", 10, 100, 25)
-        # Integrated: Regional & Food Culture inputs
-        region_type = st.selectbox("Location/Region", ["Rural Village", "Suburban", "Urban City"])
+        # Regional inputs for accessibility
+        region_type = st.selectbox("Location", ["Rural Village", "Suburban", "Urban City"])
         food_culture = st.text_input("Local Cuisine", "South Indian")
 
 duration = st.slider("Plan Duration (Days)", 1, 7, 3)
@@ -112,14 +120,14 @@ generate_btn = st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_contai
 if generate_btn:
     with st.spinner("🏥 Analyzing report and sourcing regional ingredients..."):
         try:
-            # Regional Intelligence Prompt logic
+            # Regional Intelligence Prompt
             clinical_instructions = f"""
             ACT AS A CLINICAL DIETITIAN. 
-            1. Extract Blood Sugar, Cholesterol, and BMI from report.
-            2. REGIONAL CONSTRAINT: User lives in {region_type} and prefers {food_culture}.
-            3. SUSTAINABILITY: Strictly avoid expensive imported superfoods. 
-               Use ONLY locally available, affordable staples (e.g., Ragi, Amla, Moringa).
-            4. Generate a {duration}-day diet for {goal} ({target_cal} kcal).
+            1. Extract Blood Sugar, Cholesterol, and BMI from the uploaded report.
+            2. REGIONAL CONSTRAINT: The user is in a {region_type} and prefers {food_culture}.
+            3. ACCESSIBILITY: Strictly avoid expensive imported superfoods. 
+               Use only local, affordable staples (e.g., Ragi, Amla, lentils).
+            4. Generate a {duration}-day plan for {goal} ({target_cal} kcal).
             """
             
             if uploaded_file:
@@ -147,6 +155,6 @@ if generate_btn:
                     st.download_button("🌐 HTML", data=f"<html>{response.text}</html>", file_name="report.html", use_container_width=True)
 
         except exceptions.ResourceExhausted:
-            st.error("⚠️ AI Rate Limit Reached. Please wait 48 seconds and try again.")
+            st.error("⚠️ AI Rate Limit Reached. Please wait 48 seconds.")
         except Exception as e:
             st.error(f"Error: {e}")
