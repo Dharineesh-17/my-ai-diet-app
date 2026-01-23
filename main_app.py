@@ -2,101 +2,40 @@ import streamlit as st
 import google.generativeai as genai
 import json
 from fpdf import FPDF
+from google.api_core import exceptions
+
+# --- 1. PREMIUM CSS ---
 st.markdown("""
     <style>
-    /* 1. BOOSTED MAIN HEADER */
     .big-brand {
         font-family: 'Helvetica Neue', sans-serif;
         color: #1a1c23 !important;
         font-weight: 800 !important;
-        font-size: 55px !important; /* Huge size */
-        letter-spacing: -1.5px !important; /* Modern tight spacing */
+        font-size: 55px !important;
+        letter-spacing: -1.5px !important;
         margin-bottom: 0px !important;
         padding-top: 20px !important;
         line-height: 1.1 !important;
     }
-
-    /* 2. SUBTITLE STYLING */
     .brand-subtext {
         color: #555e6d !important;
         font-size: 20px !important;
         margin-top: -10px !important;
         padding-bottom: 30px !important;
     }
-
-    /* 3. CARD ENHANCEMENT */
-    /* This makes your input boxes look even cleaner against the big title */
-    .stNumberInput, .stSelectbox {
-        border: 1px solid #e0e0e0 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-# New row added for food specific for region wise !
-
-with col_c:
-    region_type = st.selectbox("Location/Region", ["Rural Village", "Suburban", "Urban City"])
-    # You can even add a text input for specific state/country
-    food_culture = st.text_input("Local Cuisine (e.g., South Indian, Mediterranean)", "South Indian")
-
-# --- APPLY THE NEW LARGE TITLE ---
-st.markdown('<h1 class="big-brand">🥗 AI Nutrition & Health Hub</h1>', unsafe_allow_html=True)
-st.markdown('<p class="brand-subtext">Precision health insights powered by Gemini AI</p>', unsafe_allow_html=True)
-# --- 2. PREMIUM CSS ---
-st.markdown("""
-    <style>
-    /* 1. MAIN BACKGROUND - Clean Off-White */
-    .stApp {
-        background-color: #f0f2f6 !important;
-    }
-
-    /* 2. TEXT COLOR - High Contrast Charcoal */
-    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown {
-        color: #1a1c23 !important;
-    }
-
-    /* 3. METRIC CARDS - Bold and Clear */
-    [data-testid="stMetricLabel"] {
-        color: #555e6d !important;
-        font-size: 18px !important;
-        font-weight: 600 !important;
-    }
-    [data-testid="stMetricValue"] {
-        color: #1a1c23 !important;
-        font-size: 32px !important;
-        font-weight: 800 !important;
-    }
-
-    /* 4. SIDEBAR - Dark Professional look to contrast with Main Page */
-    [data-testid="stSidebar"] {
-        background-color: #1a1c23 !important;
-    }
-    [data-testid="stSidebar"] * {
-        color: #ffffff !important; /* Force sidebar text to be pure white */
-    }
-    [data-testid="stSidebar"] .stTextInput input {
-        color: #1a1c23 !important; /* Keep input text dark so you can see what you type */
-    }
-
-    /* 5. PREMIUM BUTTON - Vibrant Health Blue */
+    .stApp { background-color: #f0f2f6 !important; }
+    [data-testid="stSidebar"] { background-color: #1a1c23 !important; }
+    [data-testid="stSidebar"] * { color: #ffffff !important; }
     div.stButton > button:first-child {
         background-color: #007bff !important;
         color: white !important;
         border-radius: 8px !important;
-        border: none !important;
         font-weight: 700 !important;
-        padding: 0.6rem 2rem !important;
-    }
-    
-    /* 6. INPUT BOXES - White with subtle shadow */
-    .stNumberInput, .stSelectbox, .stSlider {
-        background-color: white !important;
-        border-radius: 10px !important;
-        padding: 5px !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
     </style>
     """, unsafe_allow_html=True)
-# --- 3. PDF & AI HELPERS ---
+
+# --- 2. PDF & AI HELPERS ---
 def create_pdf(text):
     pdf = FPDF()
     pdf.add_page()
@@ -107,15 +46,15 @@ def create_pdf(text):
 
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    model = genai.GenerativeModel('gemini-3-flash-preview')
+    # Using Gemini 1.5 Flash for multimodal report analysis
+    model = genai.GenerativeModel('gemini-1.5-flash') 
 except:
     st.error("API Key missing in Secrets!")
 
-# --- 4. SIDEBAR (Clinical Focus) ---
+# --- 3. SIDEBAR (Login & Clinical Analysis) ---
 with st.sidebar:
     st.markdown("## 👤 User Account")
-    if 'logged_in' not in st.session_state: 
-        st.session_state.logged_in = False
+    if 'logged_in' not in st.session_state: st.session_state.logged_in = False
     
     if not st.session_state.logged_in:
         st.text_input("Email")
@@ -130,22 +69,17 @@ with st.sidebar:
             st.rerun()
 
     st.divider()
-    
-    # NEW: Focused Medical Upload Section
     st.markdown("### 📄 Clinical Analysis")
-    uploaded_file = st.file_uploader(
-        "Upload Medical Report (PDF/Image)", 
-        type=["pdf", "png", "jpg", "jpeg"],
-        help="Upload blood tests or doctor notes for AI parsing."
-    )
-    
-    if uploaded_file:
-        st.success("Report ready for analysis!")
+    uploaded_file = st.file_uploader("Upload Medical Report (PDF/Image)", type=["pdf", "png", "jpg", "jpeg"])
 
-# Input Section in Main Page
-st.markdown("### 📊 Your Daily Biometrics")
+# --- 4. HEADER ---
+st.markdown('<h1 class="big-brand">🥗 AI-NutriCare Hub</h1>', unsafe_allow_html=True)
+st.markdown('<p class="brand-subtext">Precision health insights powered by Gemini AI</p>', unsafe_allow_html=True)
+
+# --- 5. BIOMETRICS & REGIONAL INPUTS ---
+st.markdown("### 📊 Your Daily Biometrics & Region")
 with st.container(border=True):
-    col_a, col_b, col_c = st.columns(3)
+    col_a, col_b, col_c = st.columns(3) # Fix for col_c NameError
     with col_a:
         weight = st.number_input("Weight (kg)", 30, 150, 70)
         gender = st.selectbox("Gender", ["Male", "Female"])
@@ -154,16 +88,13 @@ with st.container(border=True):
         goal = st.selectbox("Goal", ["Weight Loss", "Muscle Gain", "Maintenance"])
     with col_c:
         age = st.number_input("Age", 10, 100, 25)
-        duration = st.slider("Plan Duration (Days)", 1, 7, 3)
-        # --- CLINICAL PROBLEM STATEMENT (Requirement from Mentor) ---
-st.markdown("### 🔍 AI-NutriCare Clinical Intelligence")
-with st.container(border=True):
-    st.info("""
-    **Problem:** Medical reports contain complex data (blood sugar, cholesterol, BMI) that patients struggle to interpret. 
-    **Solution:** AI-NutriCare uses NLP to parse your medical reports and generate a diet plan tailored to your specific clinical conditions.
-    """)
-    
-# 6. CALCULATIONS
+        # ADDED: Regional concept inputs
+        region_type = st.selectbox("Location/Region", ["Rural Village", "Suburban", "Urban City"])
+        food_culture = st.text_input("Local Cuisine", "South Indian")
+
+duration = st.slider("Plan Duration (Days)", 1, 7, 3)
+
+# --- 6. CALCULATIONS ---
 if gender == "Male":
     bmr = 10 * weight + 6.25 * height - 5 * age + 5
 else:
@@ -171,31 +102,31 @@ else:
 
 target_cal = bmr + 500 if goal == "Muscle Gain" else bmr - 500 if goal == "Weight Loss" else bmr
 
-# 7. DASHBOARD METRICS
+# --- 7. DASHBOARD METRICS ---
 st.divider()
 m1, m2, m3 = st.columns(3)
 m1.metric("Basal Metabolic Rate", f"{int(bmr)} kcal")
 m2.metric("Daily Target", f"{int(target_cal)} kcal", delta=goal)
 m3.metric("Water Goal", "3.5 L", delta="Optimal")
 
-# 8. CLINICAL GENERATION LOGIC
+# --- 8. CLINICAL GENERATION ---
 generate_btn = st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_container_width=True)
 
 if generate_btn:
-    with st.spinner("🏥 Analyzing medical markers and interpreting prescriptions..."):
+    with st.spinner("🏥 Analyzing medical markers and sourcing regional ingredients..."):
         try:
-            # 1. THE CLINICAL PROMPT (Directly addresses image_08c460.png objectives)
+            # INTEGRATED: Medical + Regional Prompt
             clinical_instructions = f"""
             ACT AS A CLINICAL DIETITIAN. 
-            OBJECTIVE: 
-            - Parse report to extract Blood Sugar, Cholesterol, and BMI.
-            - Interpret textual notes/prescriptions for specific conditions.
-            - Generate a {duration}-day diet for a {age}yo {gender} aiming for {goal}.
-            - Provide output with clear medical reasoning.
+            1. ANALYZE: Extract Blood Sugar, Cholesterol, and BMI from report.
+            2. CLASSIFY: Identify health conditions from textual notes.
+            3. REGIONAL CONSTRAINT: The user lives in a {region_type} and prefers {food_culture}.
+            4. ACCESSIBILITY: Strictly avoid expensive/imported superfoods. Use local staples (e.g., Ragi, Amla, local pulses).
+            5. GENERATE: {duration}-day diet for {goal} ({target_cal} kcal).
+            6. OUTPUT: Provide medical reasoning for each food choice.
             """
             
             if uploaded_file:
-                # Multimodal analysis (Text + Image/PDF)
                 file_content = uploaded_file.getvalue()
                 response = model.generate_content([
                     clinical_instructions, 
@@ -204,13 +135,13 @@ if generate_btn:
             else:
                 response = model.generate_content(clinical_instructions)
 
-            # 2. DISPLAY & EXPORT (PDF/HTML/JSON Requirement)
+            # --- 9. RESULTS & EXPORTS ---
             with st.container(border=True):
                 st.markdown("### 📋 Clinical Nutrition Report")
                 st.markdown(response.text)
                 
                 st.divider()
-                st.subheader("📥 Export Results (Easy Consumption)")
+                st.subheader("📥 Export Results (PDF/HTML/JSON)")
                 c1, c2, c3 = st.columns(3)
                 
                 with c1:
@@ -221,5 +152,7 @@ if generate_btn:
                     html_data = f"<h1>Medical Report</h1><p>{response.text}</p>"
                     st.download_button("🌐 HTML", data=html_data, file_name="report.html", use_container_width=True)
 
+        except exceptions.ResourceExhausted:
+            st.error("⚠️ AI Rate Limit Reached. Please wait 60 seconds.")
         except Exception as e:
-            st.error(f"Clinical Analysis Error: {e}")
+            st.error(f"Error: {e}")
