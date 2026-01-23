@@ -5,30 +5,60 @@ from fpdf import FPDF
 from google.api_core import exceptions
 
 # --- 1. PREMIUM CSS ---
-st.markdown("""
     <style>
+
+    /* 1. BOOSTED MAIN HEADER */
+
     .big-brand {
+
         font-family: 'Helvetica Neue', sans-serif;
+
         color: #1a1c23 !important;
+
         font-weight: 800 !important;
-        font-size: 55px !important;
+
+        font-size: 55px !important; /* Huge size */
+
+        letter-spacing: -1.5px !important; /* Modern tight spacing */
+
+        margin-bottom: 0px !important;
+
+        padding-top: 20px !important;
+
         line-height: 1.1 !important;
+
     }
+
+
+
+    /* 2. SUBTITLE STYLING */
+
     .brand-subtext {
+
         color: #555e6d !important;
+
         font-size: 20px !important;
+
+        margin-top: -10px !important;
+
         padding-bottom: 30px !important;
+
     }
-    .stApp { background-color: #f0f2f6 !important; }
-    [data-testid="stSidebar"] { background-color: #1a1c23 !important; }
-    [data-testid="stSidebar"] * { color: #ffffff !important; }
-    div.stButton > button:first-child {
-        background-color: #007bff !important;
-        color: white !important;
-        border-radius: 8px !important;
-        font-weight: 700 !important;
+
+
+
+    /* 3. CARD ENHANCEMENT */
+
+    /* This makes your input boxes look even cleaner against the big title */
+
+    .stNumberInput, .stSelectbox {
+
+        border: 1px solid #e0e0e0 !important;
+
     }
+
     </style>
+
     """, unsafe_allow_html=True)
 
 # --- 2. PDF & AI HELPERS ---
