@@ -4,11 +4,12 @@ import json
 from fpdf import FPDF
 from google.api_core import exceptions
 
-# --- 1. PREMIUM CSS (FORCED BLACK TEXT) ---
+# --- 1. PREMIUM CSS (FORCED WHITE SIDEBAR / BLACK MAIN) ---
 st.markdown("""
     <style>
-    /* Force all text, labels, and headings to pure Black */
-    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, [data-testid="stMetricValue"], [data-testid="stMetricLabel"] {
+    /* MAIN PAGE: Force all text and metrics to pure Black */
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, 
+    [data-testid="stMetricValue"], [data-testid="stMetricLabel"] {
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
     }
@@ -19,17 +20,21 @@ st.markdown("""
         font-size: 55px !important;
         line-height: 1.1 !important;
     }
-    
-    .brand-subtext {
-        font-size: 20px !important;
-        padding-bottom: 30px !important;
-    }
 
     .stApp { background-color: #f8f9fa !important; }
     
-    /* Sidebar - Dark for contrast */
+    /* SIDEBAR: Force all headings and text to White */
+    [data-testid="stSidebar"] h1, 
+    [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3, 
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] .stMarkdown {
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+    }
+    
     [data-testid="stSidebar"] { background-color: #1a1c23 !important; }
-    [data-testid="stSidebar"] * { color: #ffffff !important; }
     
     /* Button Styling */
     div.stButton > button:first-child {
@@ -52,19 +57,18 @@ def create_pdf(text):
 
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    # Gemini-1.5-flash is best for handling free tier limits
     model = genai.GenerativeModel('gemini-1.5-flash') 
 except Exception as e:
     st.error(f"API Setup Error: {e}")
 
-# --- 3. SIDEBAR (Login & Upload) ---
+# --- 3. SIDEBAR (White Headings) ---
 with st.sidebar:
     st.markdown("## 👤 User Account")
     if 'logged_in' not in st.session_state: st.session_state.logged_in = False
     
     if not st.session_state.logged_in:
-        st.text_input("Email")
-        st.text_input("Password", type="password")
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
         if st.button("Login", use_container_width=True):
             st.session_state.logged_in = True
             st.rerun()
@@ -78,14 +82,14 @@ with st.sidebar:
     st.markdown("### 📄 Clinical Analysis")
     uploaded_file = st.file_uploader("Upload Medical Report (PDF/Image)", type=["pdf", "png", "jpg", "jpeg"])
 
-# --- 4. HEADER ---
+# --- 4. MAIN PAGE HEADER ---
 st.markdown('<h1 class="big-brand">🥗 AI-NutriCare Hub</h1>', unsafe_allow_html=True)
-st.markdown('<p class="brand-subtext">Precision health insights powered by Gemini AI</p>', unsafe_allow_html=True)
+st.markdown('<p style="color: #333333 !important;">Precision health insights powered by Gemini AI</p>', unsafe_allow_html=True)
 
-# --- 5. BIOMETRICS & REGION (Integrated) ---
+# --- 5. BIOMETRICS & REGION ---
 st.markdown("### 📊 Your Daily Biometrics & Region")
 with st.container(border=True):
-    # Variables must be defined before calculations to avoid NameError
+    # Fixed: Define columns first to avoid NameError
     col_a, col_b, col_c = st.columns(3) 
     with col_a:
         weight = st.number_input("Weight (kg)", 30, 150, 70)
@@ -109,10 +113,9 @@ else:
 
 target_cal = bmr + 500 if goal == "Muscle Gain" else bmr - 500 if goal == "Weight Loss" else bmr
 
-# --- 7. DASHBOARD METRICS ---
+# --- 7. DASHBOARD METRICS (Now in pure black) ---
 st.divider()
 m1, m2, m3 = st.columns(3)
-# These values will now be black due to CSS updates
 m1.metric("Basal Metabolic Rate", f"{int(bmr)} kcal")
 m2.metric("Daily Target", f"{int(target_cal)} kcal", delta=goal)
 m3.metric("Water Goal", "3.5 L", delta="Optimal")
@@ -123,14 +126,12 @@ generate_btn = st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_contai
 if generate_btn:
     with st.spinner("🏥 Analyzing markers and local ingredients..."):
         try:
-            # Regional Intelligence Prompt
             clinical_instructions = f"""
             ACT AS A CLINICAL DIETITIAN. 
             1. Extract Blood Sugar, Cholesterol, and BMI from report.
-            2. REGIONAL CONSTRAINT: The user is in {region_type} and prefers {food_culture}.
-            3. ACCESSIBILITY: Strictly avoid expensive imported superfoods. 
-               Use local staples like Ragi, Amla, lentils, and moringa.
-            4. Generate a {duration}-day diet for {goal} ({target_cal} kcal).
+            2. REGIONAL CONSTRAINT: User is in {region_type} area and prefers {food_culture}.
+            3. ACCESSIBILITY: Avoid expensive imported superfoods. Use local staples.
+            4. Generate {duration}-day diet for {goal} ({target_cal} kcal).
             """
             
             if uploaded_file:
@@ -158,7 +159,6 @@ if generate_btn:
                     st.download_button("🌐 HTML", data=f"<html>{response.text}</html>", file_name="report.html", use_container_width=True)
 
         except exceptions.ResourceExhausted:
-            # Handle the 429 quota error gracefully
-            st.error("⚠️ AI Rate Limit Reached. Please wait 48 seconds.") 
+            st.error("⚠️ AI Rate Limit Reached. Please wait 48 seconds.")
         except Exception as e:
             st.error(f"Error: {e}")
