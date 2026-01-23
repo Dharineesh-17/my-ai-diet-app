@@ -31,6 +31,12 @@ st.markdown("""
     }
     </style>
     """, unsafe_allow_html=True)
+# New row added for food specific for region wise !
+
+with col_c:
+    region_type = st.selectbox("Location/Region", ["Rural Village", "Suburban", "Urban City"])
+    # You can even add a text input for specific state/country
+    food_culture = st.text_input("Local Cuisine (e.g., South Indian, Mediterranean)", "South Indian")
 
 # --- APPLY THE NEW LARGE TITLE ---
 st.markdown('<h1 class="big-brand">🥗 AI Nutrition & Health Hub</h1>', unsafe_allow_html=True)
@@ -171,6 +177,13 @@ m1, m2, m3 = st.columns(3)
 m1.metric("Basal Metabolic Rate", f"{int(bmr)} kcal")
 m2.metric("Daily Target", f"{int(target_cal)} kcal", delta=goal)
 m3.metric("Water Goal", "3.5 L", delta="Optimal")
+with st.container(border=True):
+    st.markdown("### 🌍 Regional & Cultural Context")
+    col_r1, col_r2 = st.columns(2)
+    with col_r1:
+        region_type = st.selectbox("Living Environment", ["Rural Village", "Suburban", "Urban City"])
+    with col_r2:
+        food_culture = st.text_input("Local Cuisine Preference", "South Indian")
 
 # 8. CLINICAL GENERATION LOGIC
 generate_btn = st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_container_width=True)
