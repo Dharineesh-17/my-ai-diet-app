@@ -4,12 +4,13 @@ import json
 from fpdf import FPDF
 from google.api_core import exceptions
 
-# --- 1. PREMIUM CSS (Black Heading Focus) ---
+# --- 1. PREMIUM CSS (FORCED BLACK TEXT) ---
 st.markdown("""
     <style>
-    /* Force all headings to Black for visibility */
-    h1, h2, h3, h4, h5, h6, .big-brand {
+    /* Force all text, labels, and headings to pure Black */
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, [data-testid="stMetricValue"], [data-testid="stMetricLabel"] {
         color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
     }
     
     .big-brand {
@@ -20,18 +21,17 @@ st.markdown("""
     }
     
     .brand-subtext {
-        color: #333333 !important;
         font-size: 20px !important;
         padding-bottom: 30px !important;
     }
 
-    .stApp { background-color: #f0f2f6 !important; }
+    .stApp { background-color: #f8f9fa !important; }
     
-    /* Sidebar Styling */
+    /* Sidebar - Dark for contrast */
     [data-testid="stSidebar"] { background-color: #1a1c23 !important; }
     [data-testid="stSidebar"] * { color: #ffffff !important; }
     
-    /* Input & Button Styling */
+    /* Button Styling */
     div.stButton > button:first-child {
         background-color: #007bff !important;
         color: white !important;
@@ -52,11 +52,12 @@ def create_pdf(text):
 
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+    # Gemini-1.5-flash is best for handling free tier limits
     model = genai.GenerativeModel('gemini-1.5-flash') 
 except Exception as e:
     st.error(f"API Setup Error: {e}")
 
-# --- 3. SIDEBAR (Clinical Focus) ---
+# --- 3. SIDEBAR (Login & Upload) ---
 with st.sidebar:
     st.markdown("## 👤 User Account")
     if 'logged_in' not in st.session_state: st.session_state.logged_in = False
@@ -81,10 +82,11 @@ with st.sidebar:
 st.markdown('<h1 class="big-brand">🥗 AI-NutriCare Hub</h1>', unsafe_allow_html=True)
 st.markdown('<p class="brand-subtext">Precision health insights powered by Gemini AI</p>', unsafe_allow_html=True)
 
-# --- 5. BIOMETRICS & REGION (Integrated Concept) ---
+# --- 5. BIOMETRICS & REGION (Integrated) ---
 st.markdown("### 📊 Your Daily Biometrics & Region")
 with st.container(border=True):
-    col_a, col_b, col_c = st.columns(3) # Variables created before calculations
+    # Variables must be defined before calculations to avoid NameError
+    col_a, col_b, col_c = st.columns(3) 
     with col_a:
         weight = st.number_input("Weight (kg)", 30, 150, 70)
         gender = st.selectbox("Gender", ["Male", "Female"])
@@ -93,13 +95,13 @@ with st.container(border=True):
         goal = st.selectbox("Goal", ["Weight Loss", "Muscle Gain", "Maintenance"])
     with col_c:
         age = st.number_input("Age", 10, 100, 25)
-        # Regional inputs for accessibility
+        # Regional Concept for food accessibility
         region_type = st.selectbox("Location", ["Rural Village", "Suburban", "Urban City"])
         food_culture = st.text_input("Local Cuisine", "South Indian")
 
 duration = st.slider("Plan Duration (Days)", 1, 7, 3)
 
-# --- 6. BMR CALCULATIONS ---
+# --- 6. CALCULATIONS ---
 if gender == "Male":
     bmr = 10 * weight + 6.25 * height - 5 * age + 5
 else:
@@ -110,24 +112,25 @@ target_cal = bmr + 500 if goal == "Muscle Gain" else bmr - 500 if goal == "Weigh
 # --- 7. DASHBOARD METRICS ---
 st.divider()
 m1, m2, m3 = st.columns(3)
+# These values will now be black due to CSS updates
 m1.metric("Basal Metabolic Rate", f"{int(bmr)} kcal")
 m2.metric("Daily Target", f"{int(target_cal)} kcal", delta=goal)
 m3.metric("Water Goal", "3.5 L", delta="Optimal")
 
-# --- 8. CLINICAL GENERATION LOGIC ---
+# --- 8. CLINICAL GENERATION ---
 generate_btn = st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_container_width=True)
 
 if generate_btn:
-    with st.spinner("🏥 Analyzing report and sourcing regional ingredients..."):
+    with st.spinner("🏥 Analyzing markers and local ingredients..."):
         try:
             # Regional Intelligence Prompt
             clinical_instructions = f"""
             ACT AS A CLINICAL DIETITIAN. 
-            1. Extract Blood Sugar, Cholesterol, and BMI from the uploaded report.
-            2. REGIONAL CONSTRAINT: The user is in a {region_type} and prefers {food_culture}.
+            1. Extract Blood Sugar, Cholesterol, and BMI from report.
+            2. REGIONAL CONSTRAINT: The user is in {region_type} and prefers {food_culture}.
             3. ACCESSIBILITY: Strictly avoid expensive imported superfoods. 
-               Use only local, affordable staples (e.g., Ragi, Amla, lentils).
-            4. Generate a {duration}-day plan for {goal} ({target_cal} kcal).
+               Use local staples like Ragi, Amla, lentils, and moringa.
+            4. Generate a {duration}-day diet for {goal} ({target_cal} kcal).
             """
             
             if uploaded_file:
@@ -139,7 +142,7 @@ if generate_btn:
             else:
                 response = model.generate_content(clinical_instructions)
 
-            # --- 9. DISPLAY & EXPORT ---
+            # --- 9. RESULTS & EXPORT ---
             with st.container(border=True):
                 st.markdown("### 📋 Clinical Nutrition Report")
                 st.markdown(response.text)
@@ -155,6 +158,7 @@ if generate_btn:
                     st.download_button("🌐 HTML", data=f"<html>{response.text}</html>", file_name="report.html", use_container_width=True)
 
         except exceptions.ResourceExhausted:
-            st.error("⚠️ AI Rate Limit Reached. Please wait 48 seconds.")
+            # Handle the 429 quota error gracefully
+            st.error("⚠️ AI Rate Limit Reached. Please wait 48 seconds.") 
         except Exception as e:
             st.error(f"Error: {e}")
