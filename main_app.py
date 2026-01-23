@@ -57,7 +57,7 @@ def create_pdf(text):
 
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    model = genai.GenerativeModel('gemini-3-flash-preview')
+    model = genai.GenerativeModel('gemini-2.0-flash-exp')
 except Exception as e:
     st.error(f"API Setup Error: {e}")
 
