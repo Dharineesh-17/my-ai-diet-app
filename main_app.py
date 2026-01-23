@@ -59,7 +59,7 @@ def create_pdf(text):
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
     # FIXED: Using Gemini 2.0 Flash for superior multimodal reasoning
-    model = genai.GenerativeModel('gemini-2.0-flash-exp') 
+    model = genai.GenerativeModel('gemini-3.0-flash-preview') 
 except Exception as e:
     st.error("API configuration error. Check your secrets.")
 
