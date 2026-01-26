@@ -146,4 +146,4 @@ if st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_container_width=Tr
                 time.sleep(1)
             timer.success("Ready! Please click the button again.")
         except Exception as e:
-            st.error(f"Error: {e}") modify inside this code
+            st.error(f"Error: {e}")
