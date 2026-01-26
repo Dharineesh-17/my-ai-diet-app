@@ -72,7 +72,7 @@ with st.sidebar:
     st.markdown("### ⚙️ Model Settings")
     # Switch models to bypass individual quota limits
     selected_model_name = st.selectbox("Select Gemini Model", 
-                                      ['gemini-1.5-flash-latest', 'gemini-1.5-pro-latest', 'gemini-2.0-flash-exp'])
+                                      ['gemini-1.5-flash-latest','gemini-2.0-flash-exp','gemini-3.0-flash-exp'])
 
     st.divider()
     st.markdown("### 📄 Clinical Analysis")
