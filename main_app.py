@@ -54,7 +54,7 @@ def create_pdf(text):
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
     # Using 'gemini-1.5-flash' to prevent 404 Not Found errors
-    model = genai.GenerativeModel('gemini-1.5-flash') 
+  AVAILABLE_MODELS = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp']
 except Exception as e:
     st.error("API Key error. Check Streamlit Secrets for 'GOOGLE_API_KEY'.")
 
