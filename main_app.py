@@ -42,7 +42,7 @@ def create_pdf(text):
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
-        # Fixes encoding issues that crash old FPDF versions
+        # Fixes encoding issues for FPDF
         clean_text = text.encode('latin-1', 'ignore').decode('latin-1')
         pdf.multi_cell(0, 10, txt=clean_text)
         return pdf.output(dest="S").encode("latin-1")
@@ -50,18 +50,11 @@ def create_pdf(text):
         st.error(f"PDF Error: {e}")
         return None
 
-# --- 3. CORE AI SETUP ---
-try:
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    # Using 'gemini-1.5-flash' to prevent 404 Not Found errors
-  AVAILABLE_MODELS = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp']
-except Exception as e:
-    st.error("API Key error. Check Streamlit Secrets for 'GOOGLE_API_KEY'.")
-
-# --- 4. SIDEBAR ---
+# --- 3. SIDEBAR (LOGIC & SETTINGS) ---
 with st.sidebar:
     st.markdown("## 👤 User Account")
-    if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+    if 'logged_in' not in st.session_state: 
+        st.session_state.logged_in = False
     
     if not st.session_state.logged_in:
         st.text_input("Email")
@@ -76,12 +69,26 @@ with st.sidebar:
             st.rerun()
 
     st.divider()
+    st.markdown("### ⚙️ Model Settings")
+    # Added model selection so you can switch if one hits a limit
+    selected_model = st.selectbox("Switch Model on Limit", 
+                                 ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'])
+
+    st.divider()
     st.markdown("### 📄 Clinical Analysis")
     uploaded_file = st.file_uploader("Upload Report", type=["pdf", "png", "jpg", "jpeg"])
 
+# --- 4. CORE AI SETUP ---
+try:
+    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+    # Initialize the model based on sidebar selection
+    model = genai.GenerativeModel(selected_model)
+except Exception as e:
+    st.error("API Key error. Check Streamlit Secrets.")
+
 # --- 5. MAIN PAGE ---
 st.markdown('<h1 class="big-brand">🥗 AI-NutriCare Hub</h1>', unsafe_allow_html=True)
-st.caption("Clinical health intelligence powered by Gemini 1.5 Flash")
+st.caption(f"Intelligence powered by {selected_model}")
 
 # --- 6. BIOMETRICS ---
 st.markdown("### 📊 Biometrics & Regional Context")
@@ -113,9 +120,9 @@ m3.metric("Water", "3.5 L", delta="Optimal")
 
 # --- 8. CLINICAL GENERATION ---
 if st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_container_width=True):
-    with st.spinner("🏥 Consulting AI..."):
+    with st.spinner(f"🏥 Consulting {selected_model}..."):
         try:
-            prompt = f"Clinical Dietitian: {goal} plan for {age}y {gender}, {weight}kg. Cuisine: {food_culture}. {duration} days."
+            prompt = f"Clinical Dietitian: Create a {goal} plan for {age}y {gender}, {weight}kg. Cuisine: {food_culture}. {duration} days."
             
             if uploaded_file:
                 res = model.generate_content([prompt, {"mime_type": uploaded_file.type, "data": uploaded_file.getvalue()}])
@@ -139,11 +146,11 @@ if st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_container_width=Tr
                     st.download_button("🌐 HTML", data=f"<html><body>{res.text}</body></html>", file_name="report.html", use_container_width=True)
 
         except exceptions.ResourceExhausted:
-            st.warning("⚠️ API Limit Reached! Start 48s Cooldown.")
+            st.warning(f"⚠️ {selected_model} Limit Reached! Switching to Cooldown.")
             timer = st.empty()
             for i in range(48, 0, -1):
                 timer.metric("⏳ Waiting...", f"{i}s")
                 time.sleep(1)
-            timer.success("Ready! Please click the button again.")
+            timer.success("Ready! You can try again or switch to a different model in the sidebar.")
         except Exception as e:
             st.error(f"Error: {e}")
