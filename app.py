@@ -1,14 +1,12 @@
 import streamlit as st
-import google.generativeai as genai
 import json
 import time
 from fpdf import FPDF
-from google.api_core import exceptions
+from groq import Groq  # Switched from Google
 
 # --- 1. THEME & VISIBILITY CSS ---
 st.set_page_config(page_title="AI-NutriCare Hub", layout="wide")
 
-# Sanitized CSS - Removed all non-printable characters
 st.markdown("""
 <style>
 h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, 
@@ -43,7 +41,6 @@ def create_pdf(text):
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
-        # Sanitizing text to prevent encoding crashes
         clean_text = text.encode('latin-1', 'ignore').decode('latin-1')
         pdf.multi_cell(0, 10, txt=clean_text)
         return pdf.output(dest="S").encode("latin-1")
@@ -70,9 +67,9 @@ with st.sidebar:
 
     st.divider()
     st.markdown("### ⚙️ Model Settings")
-    # Switch models to bypass individual quota limits
-    selected_model_name = st.selectbox("Select Gemini Model", 
-                                      ['gemini-1.5-flash-latest','gemini-2.0-flash-exp','gemini-3.0-flash-exp'])
+    # Llama 3 models via Groq
+    selected_model_name = st.selectbox("Select Llama Model", 
+                                     ['llama3-8b-8192', 'llama3-70b-8192'])
 
     st.divider()
     st.markdown("### 📄 Clinical Analysis")
@@ -80,15 +77,13 @@ with st.sidebar:
 
 # --- 4. CORE AI SETUP ---
 try:
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    # Model is initialized inside the try block with proper indentation
-    model = genai.GenerativeModel(selected_model_name)
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 except Exception as e:
-    st.error("API Key error. Check Streamlit Secrets.")
+    st.error("Groq API Key error. Check Streamlit Secrets.")
 
 # --- 5. MAIN PAGE ---
 st.markdown('<h1 class="big-brand">🥗 AI-NutriCare Hub</h1>', unsafe_allow_html=True)
-st.caption(f"Powered by {selected_model_name}")
+st.caption(f"Powered by {selected_model_name} (Groq)")
 
 # --- 6. BIOMETRICS ---
 st.markdown("### 📊 Biometrics & Regional Context")
@@ -107,7 +102,7 @@ with st.container(border=True):
 
 duration = st.slider("Plan Duration (Days)", 1, 7, 3)
 
-# Calculations
+# BMR Calculation
 bmr = (10 * weight + 6.25 * height - 5 * age + 5) if gender == "Male" else (10 * weight + 6.25 * height - 5 * age - 161)
 target_cal = bmr + 500 if goal == "Muscle Gain" else bmr - 500 if goal == "Weight Loss" else bmr
 
@@ -122,33 +117,39 @@ m3.metric("Water", "3.5 L", delta="Optimal")
 if st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_container_width=True):
     with st.spinner(f"🏥 Consulting {selected_model_name}..."):
         try:
-            prompt = f"Clinical Dietitian: Create a {goal} plan for {age}y {gender}, {weight}kg. Cuisine: {food_culture}. Duration: {duration} days."
-            
+            # Handle File Text Extraction if present
+            file_context = ""
             if uploaded_file:
-                res = model.generate_content([prompt, {"mime_type": uploaded_file.type, "data": uploaded_file.getvalue()}])
-            else:
-                res = model.generate_content(prompt)
+                import PyPDF2
+                if uploaded_file.type == "application/pdf":
+                    reader = PyPDF2.PdfReader(uploaded_file)
+                    for page in reader.pages: file_context += page.extract_text()
+            
+            prompt = f"Clinical Dietitian: Create a {goal} plan for {age}y {gender}, {weight}kg. Cuisine: {food_culture}. Duration: {duration} days. Context from report: {file_context}"
+            
+            # Groq API Call
+            completion = client.chat.completions.create(
+                model=selected_model_name,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=2048
+            )
+            
+            res_text = completion.choices[0].message.content
 
             with st.container(border=True):
                 st.markdown("### 📋 Nutrition Report")
-                st.markdown(res.text)
+                st.markdown(res_text)
                 
                 st.divider()
                 st.subheader("📥 Export")
                 c1, c2, _ = st.columns(3)
                 with c1:
-                    pdf_data = create_pdf(res.text)
+                    pdf_data = create_pdf(res_text)
                     if pdf_data:
                         st.download_button("💾 PDF", data=pdf_data, file_name="report.pdf", use_container_width=True)
                 with c2:
-                    st.download_button("📄 JSON", data=json.dumps({"analysis": res.text[:500]}), file_name="report.json", use_container_width=True)
+                    st.download_button("📄 JSON", data=json.dumps({"analysis": res_text[:500]}), file_name="report.json", use_container_width=True)
 
-        except exceptions.ResourceExhausted:
-            st.warning(f"⚠️ {selected_model_name} Limit Reached! Switching to Cooldown.")
-            timer = st.empty()
-            for i in range(48, 0, -1):
-                timer.metric("⏳ Waiting...", f"{i}s")
-                time.sleep(1)
-            st.success("Ready! Try switching the model in the sidebar to skip the wait.")
         except Exception as e:
             st.error(f"Error: {e}")
