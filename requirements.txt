@@ -62,4 +62,5 @@ watchdog==6.0.0
 pillow
 groq
 PyPDF2
+ pytesseract
 
