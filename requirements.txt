@@ -63,4 +63,5 @@ pillow
 groq
 PyPDF2
  pytesseract
+easyocr
 
