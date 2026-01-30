@@ -6,29 +6,38 @@ import easyocr
 import numpy as np
 
 # --- 1. DASHBOARD UI ---
-st.set_page_config(page_title="NutriCare AI Premium", layout="wide")
+st.set_page_config(page_title="AI based diet plan generator", layout="wide")
 
+# Add this to your existing CSS block
 st.markdown("""
     <style>
-    .stApp { background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%) !important; }
-    
-    /* Input Container */
-    [data-testid="stVerticalBlock"] > div:has(div.stNumberInput) {
-        background-color: #0e1117 !important;
-        border-radius: 20px;
-        padding: 30px !important;
-    }
-
-    /* Results Visibility */
+    /* Force Results Area to be High Contrast */
     .stTabs [data-baseweb="tab-panel"] {
         background-color: #ffffff !important;
-        color: #1a1a1a !important;
-        border-radius: 15px;
+        color: #000000 !important;
+        border-radius: 0 0 15px 15px !important;
         padding: 25px !important;
+        border: 1px solid #e0e0e0 !important;
     }
-    .stTabs [data-baseweb="tab-panel"] * { color: #1a1a1a !important; }
     
-    label, p, [data-testid="stMetricLabel"] { color: #ffffff !important; font-weight: 700 !important; }
+    /* Ensure Markdown text inside tabs is pure black */
+    .stTabs [data-baseweb="tab-panel"] div, 
+    .stTabs [data-baseweb="tab-panel"] p, 
+    .stTabs [data-baseweb="tab-panel"] li {
+        color: #1a1a1a !important;
+        font-weight: 500 !important;
+    }
+
+    /* Tab Headers visibility */
+    button[data-baseweb="tab"] {
+        background-color: #f8fafc !important;
+        border-radius: 10px 10px 0 0 !important;
+        margin-right: 5px !important;
+    }
+    
+    button[data-baseweb="tab"] p {
+        color: #000000 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
