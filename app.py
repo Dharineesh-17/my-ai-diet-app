@@ -3,7 +3,7 @@ import json
 from groq import Groq
 import PyPDF2
 from PIL import Image
-import easyocr # Better for Streamlit Cloud than Tesseract
+import easyocr 
 import numpy as np
 
 # --- 1. CLINICAL THEME ENGINE ---
