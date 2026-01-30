@@ -3,7 +3,7 @@ import json
 from groq import Groq
 import PyPDF2
 from PIL import Image
-import pytesseract  # You will need to install 'pytesseract' and the Tesseract OCR engine
+import pytesseract  
 
 # --- 1. PREMIUM UI ENGINE ---
 st.set_page_config(page_title="AI Base Diet Plan Generator", layout="wide")
