@@ -61,7 +61,7 @@ with st.sidebar:
     model_choice = st.selectbox("LLM Engine", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
 
 # --- 4. DASHBOARD WORKSPACE ---
-st.title("AI Based Diet plan Generator")
+st.title("🥗 AI Based Diet plan Generator")
 
 with st.container():
     # Row 1: Vitals
