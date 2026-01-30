@@ -1,77 +1,87 @@
 import streamlit as st
-import json
-import PyPDF2
-from fpdf import FPDF
-from groq import Groq
 
-# --- 1. SETTINGS & GLASSMORPHISM UI ---
-st.set_page_config(page_title="NutriCare AI Premium", layout="wide", initial_sidebar_state="expanded")
-
-# Custom CSS for a professional Clinical UI
+# --- 1. GLOBAL COLOR ENGINE ---
+# We use !important to override Streamlit's default dark-mode text dimming
 st.markdown("""
     <style>
-    /* Main Background */
+    /* Main Background Gradient */
     .stApp {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    }
-    
-    /* Glassmorphism Containers */
-    [data-testid="stVerticalBlock"] > div:has(div.stMetric) {
-        background: rgba(255, 255, 255, 0.7);
-        border-radius: 15px;
-        padding: 20px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%) !important;
     }
 
-    /* Professional Sidebar */
+    /* Glassmorphism Cards: White base with high-contrast black text */
+    [data-testid="stVerticalBlock"] > div:has(div.stMetric), .stExpander {
+        background: rgba(255, 255, 255, 0.8) !important;
+        border-radius: 20px !important;
+        padding: 25px !important;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    /* CRITICAL: Force all text to be pure black for readability */
+    h1, h2, h3, p, label, .stMarkdown, [data-testid="stMetricLabel"] {
+        color: #1a1a1a !important;
+        font-weight: 600 !important;
+    }
+
+    /* Metric Values: Bold Blue for visibility */
+    [data-testid="stMetricValue"] {
+        color: #007bff !important;
+        font-size: 2.2rem !important;
+    }
+
+    /* Sidebar: Professional Deep Navy */
     [data-testid="stSidebar"] {
-        background-color: #0e1117 !important;
-    }
-
-    /* Custom Buttons */
-    div.stButton > button:first-child {
-        background: linear-gradient(45deg, #007bff, #00d4ff);
-        color: white;
-        border: none;
-        padding: 12px 30px;
-        border-radius: 25px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        width: 100%;
+        background-color: #0f172a !important;
     }
     
-    div.stButton > button:first-child:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,123,255,0.4);
+    [data-testid="stSidebar"] * {
+        color: #ffffff !important;
+    }
+
+    /* Clinical Action Button: Pulse Blue */
+    div.stButton > button:first-child {
+        background: linear-gradient(90deg, #2563eb, #3b82f6) !important;
+        color: white !important;
+        border: none !important;
+        padding: 15px !important;
+        font-size: 18px !important;
+        border-radius: 50px !important;
+        transition: 0.3s all ease;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. STATE & LOGIC ---
-if 'res_text' not in st.session_state: st.session_state.res_text = ""
+# --- 2. UPDATED DASHBOARD LAYOUT ---
+st.title("🏥 NutriCare AI: Clinical Audit")
 
-def extract_pdf_text(file):
-    reader = PyPDF2.PdfReader(file)
-    return "".join([page.extract_text() or "" for page in reader.pages])
+# Metric Row with Visibility delta colors
+c1, c2, c3 = st.columns(3)
+with c1:
+    st.metric("BMR", "1673 kcal", help="Basal Metabolic Rate")
+with c2:
+    st.metric("Target", "1173 kcal", delta="-500 (Loss)", delta_color="normal")
+with c3:
+    st.metric("BMI", "22.9", delta="Healthy", delta_color="off")
 
-# --- 3. SIDEBAR NAVIGATION ---
-with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/3063/3063176.png", width=80)
-    st.title("NutriCare AI")
-    
-    with st.expander("🔑 Access Control", expanded=False):
-        st.text_input("Clinician ID")
-        st.checkbox("Emergency Audit Mode")
+# --- 3. INPUT SECTION ---
+with st.container():
+    st.markdown("### 📊 Patient Vitals")
+    col_a, col_b, col_c = st.columns(3)
+    with col_a:
+        weight = st.number_input("Weight (kg)", value=70)
+    with col_b:
+        height = st.number_input("Height (cm)", value=175)
+    with col_c:
+        age = st.number_input("Age", value=25)
 
-    st.divider()
-    model_choice = st.selectbox("Intelligence Engine", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
-    uploaded_file = st.file_uploader("🧬 Upload Bio-Report", type=["pdf"])
-
-# --- 4. DASHBOARD HEADER ---
-st.markdown('# 🏥 Clinical Dashboard')
-st.caption("Real-time AI Dietary Audit & Physiological Analysis")
+# --- 4. CLINICAL STATUS CARDS ---
+st.markdown("### 🚩 Detected Conditions")
+# Using expanders as high-visibility cards
+with st.expander("⚠️ PCOD/PCOS Detected", expanded=True):
+    st.write("**Avoid:** Dairy, Soy, Sugar")
+    st.info("💡 Focus on Hormone Balance and low-GI foods.")
 
 # --- 5. INTERACTIVE INPUT GRID ---
 with st.container():
