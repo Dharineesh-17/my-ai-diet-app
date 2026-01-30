@@ -8,36 +8,51 @@ import re
 
 # --- 1. UI SETUP ---
 st.set_page_config(page_title="AI Diet Plan Generator", layout="wide")
-# Add this to your existing CSS block
 st.markdown("""
     <style>
-    /* Force Results Area to be High Contrast */
-    .stTabs [data-baseweb="tab-panel"] {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        border-radius: 0 0 15px 15px !important;
-        padding: 25px !important;
-        border: 1px solid #e0e0e0 !important;
+    /* Main Background */
+    .stApp { 
+        background: linear-gradient(160deg, #f0f4f8 0%, #d9e2ec 100%) !important; 
     }
     
-    /* Ensure Markdown text inside tabs is pure black */
-    .stTabs [data-baseweb="tab-panel"] div, 
-    .stTabs [data-baseweb="tab-panel"] p, 
-    .stTabs [data-baseweb="tab-panel"] li {
-        color: #1a1a1a !important;
-        font-weight: 500 !important;
+    /* Input Workspace Card */
+    [data-testid="stVerticalBlock"] > div:has(div.stNumberInput) {
+        background-color: #102a43 !important;
+        border-radius: 20px !important;
+        padding: 40px !important;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important;
     }
 
-    /* Tab Headers visibility */
-    button[data-baseweb="tab"] {
-        background-color: #f8fafc !important;
-        border-radius: 10px 10px 0 0 !important;
-        margin-right: 5px !important;
+    /* Input Label Styling */
+    label, p, [data-testid="stMetricLabel"] { 
+        color: #f0f4f8 !important; 
+        font-weight: 600 !important;
+        letter-spacing: 0.5px;
     }
-    
-    button[data-baseweb="tab"] p {
-        color: #000000 !important;
+
+    /* The Result Card (Paper Effect) */
+    .stTabs [data-baseweb="tab-panel"] {
+        background-color: #ffffff !important;
+        color: #102a43 !important;
+        border-radius: 0 0 20px 20px !important;
+        padding: 30px !important;
+        border: 1px solid #d9e2ec !important;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
     }
+    .stTabs [data-baseweb="tab-panel"] * { color: #102a43 !important; }
+
+    /* Modern Button */
+    div.stButton > button {
+        background: linear-gradient(90deg, #243b55, #141e30) !important;
+        color: white !important;
+        border-radius: 12px !important;
+        padding: 1rem 2rem !important;
+        font-weight: 700 !important;
+        width: 100% !important;
+        border: none !important;
+        transition: 0.3s all ease;
+    }
+    div.stButton > button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     </style>
     """, unsafe_allow_html=True)
 # Initialize session state for vitals
