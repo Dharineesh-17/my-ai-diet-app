@@ -5,7 +5,7 @@ import PyPDF2
 from fpdf import FPDF
 
 # --- 1. PREMIUM UI & VISIBILITY ENGINE ---
-st.set_page_config(page_title="NutriCare AI Premium", layout="wide")
+st.set_page_config(page_title="AI Base Diet Plan Generator", layout="wide")
 
 # Add this to your existing CSS block
 st.markdown("""
