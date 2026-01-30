@@ -1,106 +1,109 @@
 import streamlit as st
+import json
 from groq import Groq
 import PyPDF2
 from PIL import Image
-import pytesseract # For screenshots/images
+import easyocr # Better for Streamlit Cloud than Tesseract
+import numpy as np
 
-# --- 1. UI SETUP ---
-# Add this to your existing CSS block
+# --- 1. CLINICAL THEME ENGINE ---
+st.set_page_config(page_title="AI Clinical Dietitian", layout="wide")
+
 st.markdown("""
     <style>
-    /* Force Results Area to be High Contrast */
-    .stTabs [data-baseweb="tab-panel"] {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        border-radius: 0 0 15px 15px !important;
-        padding: 25px !important;
-        border: 1px solid #e0e0e0 !important;
-    }
+    .stApp { background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%) !important; }
     
-    /* Ensure Markdown text inside tabs is pure black */
-    .stTabs [data-baseweb="tab-panel"] div, 
-    .stTabs [data-baseweb="tab-panel"] p, 
-    .stTabs [data-baseweb="tab-panel"] li {
-        color: #1a1a1a !important;
-        font-weight: 500 !important;
+    /* Input Container Styling */
+    [data-testid="stVerticalBlock"] > div:has(div.stNumberInput) {
+        background-color: #0e1117 !important;
+        border-radius: 20px;
+        padding: 30px !important;
+        border: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* Tab Headers visibility */
-    button[data-baseweb="tab"] {
-        background-color: #f8fafc !important;
-        border-radius: 10px 10px 0 0 !important;
-        margin-right: 5px !important;
+    /* Force Label Visibility */
+    label, p, [data-testid="stMetricLabel"] { color: #ffffff !important; font-weight: 700 !important; }
+
+    /* Results Visibility Fix */
+    .stTabs [data-baseweb="tab-panel"] {
+        background-color: #ffffff !important;
+        color: #1a1a1a !important;
+        border-radius: 15px;
+        padding: 25px !important;
     }
-    
-    button[data-baseweb="tab"] p {
-        color: #000000 !important;
-    }
+    .stTabs [data-baseweb="tab-panel"] * { color: #1a1a1a !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. THE EXTRACTION ENGINE ---
-def get_report_content(file):
-    if file.type == "application/pdf":
-        reader = PyPDF2.PdfReader(file)
+# --- 2. MULTI-FILE EXTRACTION ENGINE ---
+@st.cache_resource
+def load_ocr():
+    return easyocr.Reader(['en'])
+
+def extract_data(uploaded_file):
+    """Parses PDFs and Screenshots for clinical data"""
+    if uploaded_file.type == "application/pdf":
+        reader = PyPDF2.PdfReader(uploaded_file)
         return " ".join([p.extract_text() for p in reader.pages])
     else:
         # OCR for Screenshots/Images
-        img = Image.open(file)
-        return pytesseract.image_to_string(img)
+        reader = load_ocr()
+        image = Image.open(uploaded_file)
+        results = reader.readtext(np.array(image))
+        return " ".join([res[1] for res in results])
+
+if 'res_text' not in st.session_state: st.session_state.res_text = ""
 
 # --- 3. DASHBOARD ---
-st.title("🥗 Clinical Report Analyzer & Diet Planner")
+st.title("🏥 NutriCare AI: Clinical Audit")
 
 with st.sidebar:
-    st.markdown("### 📂 Step 1: Upload Data")
-    # Supports PDF and Screenshots now!
+    st.markdown("### 📂 Data Ingestion")
+    # Supports PDF, PNG, JPG
     uploaded_file = st.file_uploader("Upload Lab Report / Screenshot", type=["pdf", "png", "jpg", "jpeg"])
-    model_choice = st.selectbox("Intelligence Engine", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
+    st.divider()
+    model_choice = st.selectbox("LLM Engine", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
 
-# Manual Overrides (Fallback if report is empty)
-with st.expander("Manual Vitals (Fallback)", expanded=False):
-    c1, c2, c3 = st.columns(3)
-    m_weight = c1.number_input("Weight (kg)", 30.0, 200.0, 70.0)
-    m_height = c2.number_input("Height (cm)", 100.0, 250.0, 175.0)
-    age = c3.number_input("Age", 1, 100, 25)
+with st.container():
+    c1, c2, c3, c4 = st.columns(4)
+    with c1: weight = st.number_input("Weight (kg)", 30.0, 200.0, 70.0)
+    with c2: height = st.number_input("Height (cm)", 100.0, 250.0, 175.0)
+    with c3: age = st.number_input("Age", 1, 100, 25)
+    with c4:
+        bmi = weight / ((height/100)**2)
+        st.metric("Live BMI", f"{bmi:.1f}", "Healthy" if 18.5 <= bmi <= 25 else "At Risk")
 
-culture = st.multiselect("Dietary Culture", ["South Indian", "North Indian", "Keto"], default=["South Indian"])
+    p1, p2 = st.columns([2, 1])
+    with p1: culture = st.multiselect("Dietary Preference", ["South Indian", "North Indian", "Keto"], default=["South Indian"])
+    with p2: goal = st.select_slider("Goal", options=["Loss", "Maintain", "Muscle"])
 
-# --- 4. THE ACTION ---
-if st.button("🚀 ANALYZE REPORT & GENERATE PLAN"):
-    if not uploaded_file:
-        st.warning("Please upload a report or screenshot to analyze!")
-    else:
-        with st.status("🧬 Extracting data from file...") as status:
-            raw_text = get_report_content(uploaded_file)
+    if st.button("🚀 GENERATE REPORT-BASED AUDIT", use_container_width=True):
+        with st.status("🧬 Analyzing file data...") as status:
+            report_text = extract_data(uploaded_file) if uploaded_file else "No report provided."
             
-            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            
-            # THE CRITICAL PROMPT: Tell AI to find data in the report
-            clinical_prompt = f"""
-            SYSTEM: You are a Senior Clinical Dietitian.
-            INPUT DATA: 
-            - Extracted Report Text: {raw_text}
-            - Fallback Vitals: Weight {m_weight}kg, Height {m_height}cm, Age {age}.
-            - Culture: {culture}
+            try:
+                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                # THE PROMPT: Commands AI to prioritize report data over manual inputs
+                prompt = f"""
+                You are a Senior Dietitian. 
+                PRIMARY DATA SOURCE: {report_text}
+                MANUAL FALLBACKS: {age}y, {weight}kg, {height}cm.
+                CULTURE: {culture} | GOAL: {goal}
 
-            TASK:
-            1. Scrutinize the 'Extracted Report Text' for any clinical markers (Blood Sugar, Cholesterol, Weight, BMI).
-            2. If the report contains a weight/height different from the fallbacks, USE THE REPORT DATA.
-            3. Identify health risks (e.g., Anemia, PCOD, Diabetes) based on the report values.
-            4. Create a specific meal plan based on these findings.
-            """
-            
-            chat = client.chat.completions.create(
-                messages=[{"role": "user", "content": clinical_prompt}],
-                model=model_choice
-            )
-            st.session_state.final_res = chat.choices[0].message.content
-            status.update(label="✅ Analysis Complete!", state="complete")
+                TASK:
+                1. First, search the PRIMARY DATA SOURCE for Weight, Height, and clinical markers (Sugar, BMI, etc.).
+                2. If the report has data, IGNORE the Manual Fallbacks for those values.
+                3. Create a nutrition plan based on these clinical findings.
+                """
+                chat = client.chat.completions.create(messages=[{"role": "user", "content": prompt}], model=model_choice)
+                st.session_state.res_text = chat.choices[0].message.content
+                status.update(label="✅ Analysis Complete!", state="complete")
+            except Exception as e:
+                st.error(f"Error: {e}")
 
-# --- 5. DISPLAY ---
-if 'final_res' in st.session_state:
-    st.markdown("### 📋 Clinical Nutrition Prescription")
+# --- 4. OUTPUT ---
+if st.session_state.res_text:
+    st.markdown("### 📋 AI Nutrition Prescription")
     t1, t2 = st.tabs(["🍏 Meal Plan", "📈 Report Insights"])
-    with t1: st.markdown(st.session_state.final_res)
-    with t2: st.info("The AI has cross-referenced your report markers with standard clinical ranges.")
+    with t1: st.markdown(st.session_state.res_text)
+    with t2: st.info("💡 Tip: AI prioritized clinical markers found in your upload.")
