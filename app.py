@@ -8,69 +8,37 @@ import re
 
 # --- 1. UI SETUP ---
 st.set_page_config(page_title="AI Diet Plan Generator", layout="wide")
-
 # Add this to your existing CSS block
-
 st.markdown("""
-
     <style>
-
     /* Force Results Area to be High Contrast */
-
     .stTabs [data-baseweb="tab-panel"] {
-
         background-color: #ffffff !important;
-
         color: #000000 !important;
-
         border-radius: 0 0 15px 15px !important;
-
         padding: 25px !important;
-
         border: 1px solid #e0e0e0 !important;
-
     }
-
     
-
     /* Ensure Markdown text inside tabs is pure black */
-
     .stTabs [data-baseweb="tab-panel"] div, 
-
     .stTabs [data-baseweb="tab-panel"] p, 
-
     .stTabs [data-baseweb="tab-panel"] li {
-
         color: #1a1a1a !important;
-
         font-weight: 500 !important;
-
     }
-
-
 
     /* Tab Headers visibility */
-
     button[data-baseweb="tab"] {
-
         background-color: #f8fafc !important;
-
         border-radius: 10px 10px 0 0 !important;
-
         margin-right: 5px !important;
-
     }
-
     
-
     button[data-baseweb="tab"] p {
-
         color: #000000 !important;
-
     }
-
     </style>
-
     """, unsafe_allow_html=True)
 
 # Initialize session state for vitals
