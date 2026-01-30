@@ -7,52 +7,35 @@ from fpdf import FPDF
 # --- 1. PREMIUM UI & VISIBILITY ENGINE ---
 st.set_page_config(page_title="NutriCare AI Premium", layout="wide")
 
+# Add this to your existing CSS block
 st.markdown("""
     <style>
-    /* Main Aesthetic Background */
-    .stApp { 
-        background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%) !important; 
+    /* Force Results Area to be High Contrast */
+    .stTabs [data-baseweb="tab-panel"] {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border-radius: 0 0 15px 15px !important;
+        padding: 25px !important;
+        border: 1px solid #e0e0e0 !important;
     }
     
-    /* THE WORKSPACE: High-contrast dark container for visibility */
-    [data-testid="stVerticalBlock"] > div:has(div.stNumberInput) {
-        background-color: #0e1117 !important; 
-        border-radius: 25px !important;
-        padding: 40px !important;
-        box-shadow: 0 15px 50px rgba(0,0,0,0.3) !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
+    /* Ensure Markdown text inside tabs is pure black */
+    .stTabs [data-baseweb="tab-panel"] div, 
+    .stTabs [data-baseweb="tab-panel"] p, 
+    .stTabs [data-baseweb="tab-panel"] li {
+        color: #1a1a1a !important;
+        font-weight: 500 !important;
     }
 
-    /* Force Label Visibility: Pure White against the dark workspace */
-    label, .stMarkdown p, [data-testid="stMetricLabel"], .stSelectbox p {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-        font-size: 1.1rem !important;
+    /* Tab Headers visibility */
+    button[data-baseweb="tab"] {
+        background-color: #f8fafc !important;
+        border-radius: 10px 10px 0 0 !important;
+        margin-right: 5px !important;
     }
-
-    /* Metric Values: Neon blue for that "Medical Monitor" look */
-    [data-testid="stMetricValue"] {
-        color: #00f2ff !important;
-        font-weight: 900 !important;
-    }
-
-    /* Title Styling: Dark and bold to sit on the light background */
-    h1 {
-        color: #0e1117 !important;
-        font-weight: 900 !important;
-        margin-bottom: 30px !important;
-    }
-
-    /* THE ACTION BUTTON: Professional and High-Contrast */
-    div.stButton > button:first-child {
-        background: linear-gradient(90deg, #1e40af, #3b82f6) !important;
-        color: white !important;
-        border-radius: 15px !important;
-        height: 4rem !important;
-        font-size: 1.3rem !important;
-        font-weight: 800 !important;
-        width: 100% !important;
-        border: none !important;
+    
+    button[data-baseweb="tab"] p {
+        color: #000000 !important;
     }
     </style>
     """, unsafe_allow_html=True)
