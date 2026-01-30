@@ -40,7 +40,6 @@ st.markdown("""
     }
     </style>
     """, unsafe_allow_html=True)
-
 # Initialize session state for vitals
 if 'weight' not in st.session_state: st.session_state.weight = 70.0
 if 'height' not in st.session_state: st.session_state.height = 175.0
