@@ -5,10 +5,9 @@ import easyocr
 import PyPDF2
 from groq import Groq
 from PIL import Image
-from fpdf import FPDF
 
 # --- 1. PREMIUM UI & STATE ENGINE ---
-st.set_page_config(page_title="AI Based Diet Plan Generator ", layout="wide")
+st.set_page_config(page_title="NutriCare AI Pro", layout="wide")
 
 # Initialize Session State values
 for key, val in {'w': 70.0, 'h': 175.0, 'a': 25, 'res_text': "", 'raw_text': ""}.items():
@@ -81,7 +80,7 @@ def sync_dashboard_from_file(file):
 
 # --- 3. SIDEBAR ---
 with st.sidebar:
-    st.markdown("### 📂 Clinical Input")
+    st.markdown("### 📂 1. Clinical Input")
     uploaded_file = st.file_uploader("Upload Lab Report/Screenshot", type=["pdf", "png", "jpg", "jpeg"])
     
     if uploaded_file and st.button("🔍 Sync Dashboard from File"):
@@ -96,7 +95,7 @@ with st.sidebar:
 st.title("🥗 AI Based Diet Plan Generator")
 
 with st.container():
-    st.markdown("### 🩺 Verify Patient Vitals")
+    st.markdown("### 🩺 2. Verify Patient Vitals")
     v1, v2, v3, v4 = st.columns(4)
     
     # These use the session_state keys to reflect the AI extraction
@@ -124,17 +123,9 @@ with st.container():
                 st.session_state.res_text = chat.choices[0].message.content
                 status.update(label="✅ Analysis Complete!", state="complete")
 
-
-# Inside your "if st.session_state.res_text:" block:
-pdf = FPDF()
-pdf.add_page()
-pdf.set_font("Arial", size=12)
-pdf.multi_cell(0, 10, txt=st.session_state.res_text)
-pdf_output = pdf.output(dest='S').encode('latin-1') # Convert to bytes
-
-st.download_button(
-    label="📄 Download Diet Plan as PDF",
-    data=pdf_output,
-    file_name="Clinical_Diet_Plan.pdf",
-    mime="application/pdf"
-)
+# --- 5. OUTPUT ---
+if st.session_state.res_text:
+    st.divider()
+    t1, t2 = st.tabs(["🍏 Meal Plan", "📈 Extracted Lab Data"])
+    with t1: st.markdown(st.session_state.res_text)
+    with t2: st.code(st.session_state.raw_text)
