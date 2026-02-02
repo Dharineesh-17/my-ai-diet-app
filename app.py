@@ -123,9 +123,11 @@ with st.container():
                 st.session_state.res_text = chat.choices[0].message.content
                 status.update(label="✅ Analysis Complete!", state="complete")
 
-# --- 5. OUTPUT ---
+# --- 5. OUTPUT EXPERIENCE ---
 if st.session_state.res_text:
     st.divider()
-    t1, t2 = st.tabs(["🍏 Meal Plan", "📈 Extracted Lab Data"])
+    st.markdown("### 📋 AI Nutrition Prescription")
+    t1, t2 = st.tabs(["🍏 Meal Plan", "📈 Health Insights"])
     with t1: st.markdown(st.session_state.res_text)
-    with t2: st.code(st.session_state.raw_text)
+    with t2: st.info("💡 Clinical Tip: Ensure 3.5L water intake to support metabolism.")
+    st.download_button("📥 Download Plan", st.session_state.res_text, file_name="Diet_Plan.txt")
