@@ -7,7 +7,7 @@ from groq import Groq
 from PIL import Image
 
 # --- 1. PREMIUM UI & STATE ENGINE ---
-st.set_page_config(page_title="NutriCare AI Pro", layout="wide")
+st.set_page_config(page_title="AI Based Diet Plan Generater ", layout="wide")
 
 # Initialize Session State values
 for key, val in {'w': 70.0, 'h': 175.0, 'a': 25, 'res_text': "", 'raw_text': ""}.items():
@@ -80,7 +80,7 @@ def sync_dashboard_from_file(file):
 
 # --- 3. SIDEBAR ---
 with st.sidebar:
-    st.markdown("### 📂 1. Clinical Input")
+    st.markdown("### 📂 Clinical Input")
     uploaded_file = st.file_uploader("Upload Lab Report/Screenshot", type=["pdf", "png", "jpg", "jpeg"])
     
     if uploaded_file and st.button("🔍 Sync Dashboard from File"):
@@ -95,7 +95,7 @@ with st.sidebar:
 st.title("🥗 AI Based Diet Plan Generator")
 
 with st.container():
-    st.markdown("### 🩺 2. Verify Patient Vitals")
+    st.markdown("### 🩺 Verify Patient Vitals")
     v1, v2, v3, v4 = st.columns(4)
     
     # These use the session_state keys to reflect the AI extraction
