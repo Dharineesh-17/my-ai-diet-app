@@ -16,9 +16,7 @@ for key, val in {'w': 70.0, 'h': 175.0, 'a': 25, 'res_text': "", 'raw_text': ""}
 
 st.markdown("""
     <style>
-    .stApp { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important; }
-    
-    /* High Contrast Results Area */
+    /* Force Results Area to be High Contrast */
     .stTabs [data-baseweb="tab-panel"] {
         background-color: #ffffff !important;
         color: #000000 !important;
@@ -26,16 +24,22 @@ st.markdown("""
         padding: 25px !important;
         border: 1px solid #e0e0e0 !important;
     }
-    .stTabs [data-baseweb="tab-panel"] * { color: #1a1a1a !important; font-weight: 500 !important; }
-
-    /* Dashboard Input Card */
-    [data-testid="stVerticalBlock"] > div:has(div.stNumberInput) {
-        background: #0f172a !important;
-        border-radius: 20px !important;
-        padding: 30px !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+    /* Ensure Markdown text inside tabs is pure black */
+    .stTabs [data-baseweb="tab-panel"] div, 
+    .stTabs [data-baseweb="tab-panel"] p, 
+    .stTabs [data-baseweb="tab-panel"] li {
+        color: #1a1a1a !important;
+        font-weight: 500 !important;
     }
-    label, p, [data-testid="stMetricLabel"] { color: #f8fafc !important; }
+    /* Tab Headers visibility */
+    button[data-baseweb="tab"] {
+        background-color: #f8fafc !important;
+        border-radius: 15px 15px 0 0 !important;
+        margin-right: 5px !important;
+    }
+    button[data-baseweb="tab"] p {
+        color: #000000 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
