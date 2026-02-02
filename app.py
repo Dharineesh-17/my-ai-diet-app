@@ -5,6 +5,7 @@ import easyocr
 import PyPDF2
 from groq import Groq
 from PIL import Image
+from fpdf import FPDF
 
 # --- 1. PREMIUM UI & STATE ENGINE ---
 st.set_page_config(page_title="AI Based Diet Plan Generator ", layout="wide")
@@ -123,49 +124,17 @@ with st.container():
                 st.session_state.res_text = chat.choices[0].message.content
                 status.update(label="✅ Analysis Complete!", state="complete")
 
-# --- 5. OUTPUT ---
-if st.session_state.res_text:
-    st.divider()
-    
-    # --- PDF GENERATION LOGIC ---
-    def create_pdf(text):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        
-        # Clean text to remove non-Latin-1 characters (like emojis) that crash FPDF
-        clean_text = text.encode('latin-1', 'ignore').decode('latin-1')
-        
-        # multi_cell handles long text and line breaks automatically
-        pdf.multi_cell(0, 10, txt=clean_text)
-        
-        # Return as binary data
-        return pdf.output(dest='S').encode('latin-1')
 
-    # Create two columns for the download buttons
-    d1, d2 = st.columns(2)
-    
-    with d1:
-        st.download_button(
-            label="📄 Download as PDF",
-            data=create_pdf(st.session_state.res_text),
-            file_name=f"Diet_Plan_{st.session_state.a}.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
-        
-    with d2:
-        st.download_button(
-            label="📝 Download as TXT",
-            data=st.session_state.res_text,
-            file_name=f"Diet_Plan_{st.session_state.a}.txt",
-            mime="text/plain",
-            use_container_width=True
-        )
+# Inside your "if st.session_state.res_text:" block:
+pdf = FPDF()
+pdf.add_page()
+pdf.set_font("Arial", size=12)
+pdf.multi_cell(0, 10, txt=st.session_state.res_text)
+pdf_output = pdf.output(dest='S').encode('latin-1') # Convert to bytes
 
-    # Display the results in Tabs
-    t1, t2 = st.tabs(["🍏 Meal Plan", "📈 Extracted Lab Data"])
-    with t1: 
-        st.markdown(st.session_state.res_text)
-    with t2: 
-        st.code(st.session_state.raw_text)
+st.download_button(
+    label="📄 Download Diet Plan as PDF",
+    data=pdf_output,
+    file_name="Clinical_Diet_Plan.pdf",
+    mime="application/pdf"
+)
