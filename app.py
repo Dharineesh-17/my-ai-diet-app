@@ -21,7 +21,7 @@ st.markdown("""
 
         color: #000000 !important;
 
-        border-radius: 0 0 30px 30px !important;
+        border-radius: 0 0 20px 20px !important;
 
         padding: 25px !important;
 
@@ -53,7 +53,7 @@ st.markdown("""
 
         background-color: #f8fafc !important;
 
-        border-radius: 30px 30px 0 0 !important;
+        border-radius: 10px 10px 0 0 !important;
 
         margin-right: 5px !important;
 
