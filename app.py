@@ -23,7 +23,7 @@ st.markdown("""
 
         border-radius: 0 0 15px 15px !important;
 
-        padding: 25px !important;
+        padding: 30px !important;
 
         border: 1px solid #e0e0e0 !important;
 
