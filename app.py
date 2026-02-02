@@ -126,6 +126,20 @@ with st.container():
 # --- 5. OUTPUT ---
 if st.session_state.res_text:
     st.divider()
+    
+    # 1. Add a Download Button before the tabs
+    # This creates a plain text file of the AI-generated plan
+    st.download_button(
+        label="📥 Download Diet Plan as .txt",
+        data=st.session_state.res_text,
+        file_name=f"Diet_Plan_Age{st.session_state.a}_Weight{st.session_state.w}.txt",
+        mime="text/plain",
+        use_container_width=True,
+        type="primary" # Makes it stand out
+    )
+    
     t1, t2 = st.tabs(["🍏 Meal Plan", "📈 Extracted Lab Data"])
-    with t1: st.markdown(st.session_state.res_text)
-    with t2: st.code(st.session_state.raw_text)
+    with t1: 
+        st.markdown(st.session_state.res_text)
+    with t2: 
+        st.code(st.session_state.raw_text)
