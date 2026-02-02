@@ -10,7 +10,7 @@ from PIL import Image
 st.set_page_config(page_title="AI Based Diet Plan Genertor", layout="wide")
 
 # Initialize Session State values
-for key, val in {'w': 0.0, 'h': 0.0, 'a': 0, 'res_text': "", 'raw_text': ""}.items():
+for key, val in {'w': 70.0, 'h': 175.0, 'a': 25, 'res_text': "", 'raw_text': ""}.items():
     if key not in st.session_state:
         st.session_state[key] = val
 
