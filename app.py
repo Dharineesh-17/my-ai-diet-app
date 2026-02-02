@@ -34,7 +34,7 @@ st.markdown("""
     /* Tab Headers visibility */
     button[data-baseweb="tab"] {
         background-color: #f8fafc !important;
-        border-radius: 15px 15px 0 0 !important;
+        border-radius: 10px 10px 0 0 !important;
         margin-right: 5px !important;
     }
     button[data-baseweb="tab"] p {
