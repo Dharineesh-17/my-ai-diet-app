@@ -1,164 +1,131 @@
 import streamlit as st
-import google.generativeai as genai
 import json
-from fpdf import FPDF
-from google.api_core import exceptions
+import numpy as np
+import easyocr
+import PyPDF2
+from groq import Groq
+from PIL import Image
 
-# --- 1. THEME & VISIBILITY CSS ---
+# --- 1. PREMIUM UI & STATE ENGINE ---
+st.set_page_config(page_title="NutriCare AI Pro", layout="wide")
+
+# Initialize Session State values
+for key, val in {'w': 70.0, 'h': 175.0, 'a': 25, 'res_text': "", 'raw_text': ""}.items():
+    if key not in st.session_state:
+        st.session_state[key] = val
+
 st.markdown("""
     <style>
-    /* MAIN DASHBOARD: High-contrast Black for all text and metrics */
-    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, 
-    [data-testid="stMetricValue"], [data-testid="stMetricLabel"] {
+    /* Force Results Area to be High Contrast */
+    .stTabs [data-baseweb="tab-panel"] {
+        background-color: #ffffff !important;
         color: #000000 !important;
-        -webkit-text-fill-color: #000000 !important;
+        border-radius: 0 0 20px 20px !important;
+        padding: 25px !important;
+        border: 1px solid #e0e0e0 !important;
     }
-    
-    .big-brand {
-        font-family: 'Helvetica Neue', sans-serif;
-        font-weight: 800 !important;
-        font-size: 55px !important;
-        line-height: 1.1 !important;
+    /* Ensure Markdown text inside tabs is pure black */
+    .stTabs [data-baseweb="tab-panel"] div, 
+    .stTabs [data-baseweb="tab-panel"] p, 
+    .stTabs [data-baseweb="tab-panel"] li {
+        color: #1a1a1a !important;
+        font-weight: 500 !important;
     }
-
-    .stApp { background-color: #f8f9fa !important; }
-    
-    /* SIDEBAR: Pure White for all labels and headings against dark background */
-    [data-testid="stSidebar"] h1, 
-    [data-testid="stSidebar"] h2, 
-    [data-testid="stSidebar"] h3, 
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] .stMarkdown {
-        color: #ffffff !important;
-        -webkit-text-fill-color: #ffffff !important;
+    /* Tab Headers visibility */
+    button[data-baseweb="tab"] {
+        background-color: #f8fafc !important;
+        border-radius: 15px 15px 0 0 !important;
+        margin-right: 5px !important;
     }
-    
-    [data-testid="stSidebar"] { background-color: #1a1c23 !important; }
-    
-    /* Global Button Style */
-    div.stButton > button:first-child {
-        background-color: #007bff !important;
-        color: white !important;
-        border-radius: 8px !important;
-        font-weight: 700 !important;
+    button[data-baseweb="tab"] p {
+        color: #000000 !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. HELPERS ---
-def create_pdf(text):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    clean_text = text.encode('latin-1', 'ignore').decode('latin-1')
-    pdf.multi_cell(0, 10, txt=clean_text)
-    return pdf.output(dest="S").encode("latin-1")
+# --- 2. EXTRACTION ENGINE ---
+@st.cache_resource
+def load_ocr():
+    return easyocr.Reader(['en'])
 
-# --- 3. CORE AI SETUP ---
-try:
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    # FIXED: Using Gemini 2.0 Flash for superior multimodal reasoning
-    model = genai.GenerativeModel('gemini-3.0-flash-exp') 
-except Exception as e:
-    st.error("API configuration error. Check your secrets.")
-
-# --- 4. SIDEBAR (White Labels) ---
-with st.sidebar:
-    st.markdown("## 👤 User Account")
-    if 'logged_in' not in st.session_state: st.session_state.logged_in = False
-    
-    if not st.session_state.logged_in:
-        st.text_input("Email")
-        st.text_input("Password", type="password")
-        if st.button("Login", use_container_width=True):
-            st.session_state.logged_in = True
-            st.rerun()
+def sync_dashboard_from_file(file):
+    """Extracts text and applies safety bounds to prevent crashes"""
+    if file.type == "application/pdf":
+        reader = PyPDF2.PdfReader(file)
+        text = " ".join([p.extract_text() for p in reader.pages])
     else:
-        st.success("Welcome back!")
-        if st.button("Logout", use_container_width=True):
-            st.session_state.logged_in = False
-            st.rerun()
+        reader = load_ocr()
+        text = " ".join([res[1] for res in reader.readtext(np.array(Image.open(file)))])
+    
+    st.session_state.raw_text = text
+    
+    try:
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        sync_prompt = f"Extract weight(kg), height(cm), age from text: '{text}'. Return ONLY JSON: {{\"w\":num, \"h\":num, \"a\":num}}"
+        resp = client.chat.completions.create(
+            messages=[{"role": "user", "content": sync_prompt}],
+            model="llama-3.1-8b-instant",
+            response_format={"type": "json_object"}
+        )
+        vitals = json.loads(resp.choices[0].message.content) #
+        
+        # --- SAFETY CLAMPING: Prevents StreamlitValueBelowMinError ---
+        # We ensure the extracted value is never below the 'min_value' of your number_input
+        st.session_state.w = max(30.0, min(200.0, float(vitals.get('w', st.session_state.w))))
+        st.session_state.h = max(100.0, min(250.0, float(vitals.get('h', st.session_state.h))))
+        st.session_state.a = max(1, min(120, int(vitals.get('a', st.session_state.a))))
+        
+    except Exception as e:
+        st.warning(f"Note: Some vitals couldn't be auto-filled. ({e})")
 
+# --- 3. SIDEBAR ---
+with st.sidebar:
+    st.markdown("### 📂 1. Clinical Input")
+    uploaded_file = st.file_uploader("Upload Lab Report/Screenshot", type=["pdf", "png", "jpg", "jpeg"])
+    
+    if uploaded_file and st.button("🔍 Sync Dashboard from File"):
+        with st.status("🧬 Analyzing Data...") as s:
+            sync_dashboard_from_file(uploaded_file)
+            s.update(label="✅ Dashboard Updated!", state="complete")
+    
     st.divider()
-    st.markdown("### 📄 Clinical Analysis")
-    uploaded_file = st.file_uploader("Upload Medical Report", type=["pdf", "png", "jpg", "jpeg"])
+    model_choice = st.selectbox("LLM Engine", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
 
-# --- 5. MAIN PAGE ---
-st.markdown('<h1 class="big-brand">🥗 AI-NutriCare Hub</h1>', unsafe_allow_html=True)
-st.markdown('<p style="color: #333333 !important;">Clinical health intelligence via Gemini 2.0 Flash</p>', unsafe_allow_html=True)
+# --- 4. DASHBOARD ---
+st.title("🥗 AI Based Diet Plan Generator")
 
-# --- 6. BIOMETRICS & REGION ---
-st.markdown("### 📊 Biometrics & Regional Context")
-with st.container(border=True):
-    # FIXED: Define columns before use to prevent NameError
-    col_a, col_b, col_c = st.columns(3) 
-    with col_a:
-        weight = st.number_input("Weight (kg)", 30, 150, 70)
-        gender = st.selectbox("Gender", ["Male", "Female"])
-    with col_b:
-        height = st.number_input("Height (cm)", 100, 230, 175)
-        goal = st.selectbox("Goal", ["Weight Loss", "Muscle Gain", "Maintenance"])
-    with col_c:
-        age = st.number_input("Age", 10, 100, 25)
-        # Regional Concept for food accessibility
-        region_type = st.selectbox("Location Type", ["Rural Village", "Suburban", "Urban City"])
-        food_culture = st.text_input("Local Cuisine", "South Indian")
+with st.container():
+    st.markdown("### 🩺 2. Verify Patient Vitals")
+    v1, v2, v3, v4 = st.columns(4)
+    
+    # These use the session_state keys to reflect the AI extraction
+    weight = v1.number_input("Weight (kg)", 30.0, 200.0, key="w")
+    height = v2.number_input("Height (cm)", 100.0, 250.0, key="h")
+    age = v3.number_input("Age", 1, 120, key="a")
+    
+    with v4:
+        bmi = weight / ((height/100)**2)
+        st.metric("Live BMI", f"{bmi:.1f}", "Healthy" if 18.5 <= bmi <= 25 else "Attention Required")
 
-duration = st.slider("Plan Duration (Days)", 1, 7, 3)
+    # Dietary Context
+    p1, p2 = st.columns([2, 1])
+    with p1: culture = st.multiselect("Dietary Culture", ["South Indian", "North Indian", "Keto", "Mediterranean"], default=["South Indian"])
+    with p2: goal = st.select_slider("Clinical Goal", options=["Loss", "Maintain", "Muscle"])
 
-# Calculations
-if gender == "Male":
-    bmr = 10 * weight + 6.25 * height - 5 * age + 5
-else:
-    bmr = 10 * weight + 6.25 * height - 5 * age - 161
-target_cal = bmr + 500 if goal == "Muscle Gain" else bmr - 500 if goal == "Weight Loss" else bmr
+    if st.button("🚀 GENERATE CLINICAL AUDIT", use_container_width=True):
+        if not st.session_state.raw_text and not uploaded_file:
+            st.error("Please upload a report or sync data first.")
+        else:
+            with st.status("🔍 Generating Plan...") as status:
+                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+                prompt = f"Dietitian: Analyze this lab data: {st.session_state.raw_text}. Create {goal} plan for {age}y, {weight}kg ({culture})."
+                chat = client.chat.completions.create(messages=[{"role": "user", "content": prompt}], model=model_choice)
+                st.session_state.res_text = chat.choices[0].message.content
+                status.update(label="✅ Analysis Complete!", state="complete")
 
-# --- 7. METRIC DASHBOARD ---
-st.divider()
-m1, m2, m3 = st.columns(3)
-m1.metric("Basal Metabolic Rate", f"{int(bmr)} kcal")
-m2.metric("Daily Target", f"{int(target_cal)} kcal", delta=goal)
-m3.metric("Water Goal", "3.5 L", delta="Optimal")
-
-# --- 8. CLINICAL GENERATION ---
-if st.button("🚀 Analyze & Generate AI-NutriCare Plan", use_container_width=True):
-    with st.spinner("🏥 Analyzing clinical markers and regional staples..."):
-        try:
-            # Regional Intelligence Prompt
-            clinical_prompt = f"""
-            ACT AS A CLINICAL DIETITIAN. 
-            1. Extract Blood Sugar, Cholesterol, and BMI from report.
-            2. REGIONAL CONSTRAINT: User is in {region_type} and prefers {food_culture}.
-            3. ACCESSIBILITY: Avoid expensive imports. Use local staples (e.g., Ragi, Amla).
-            4. Generate {duration}-day diet for {goal} ({target_cal} kcal).
-            """
-            
-            if uploaded_file:
-                file_content = uploaded_file.getvalue()
-                response = model.generate_content([
-                    clinical_prompt, 
-                    {"mime_type": uploaded_file.type, "data": file_content}
-                ])
-            else:
-                response = model.generate_content(clinical_prompt)
-
-            # Results
-            with st.container(border=True):
-                st.markdown("### 📋 Clinical Nutrition Report")
-                st.markdown(response.text)
-                
-                st.divider()
-                st.subheader("📥 Export Results")
-                c1, c2, c3 = st.columns(3)
-                with c1:
-                    st.download_button("💾 PDF", data=create_pdf(response.text), file_name="report.pdf", use_container_width=True)
-                with c2:
-                    st.download_button("📄 JSON", data=json.dumps({"analysis": response.text[:500]}), file_name="report.json", use_container_width=True)
-                with c3:
-                    st.download_button("🌐 HTML", data=f"<html>{response.text}</html>", file_name="report.html", use_container_width=True)
-
-        except exceptions.ResourceExhausted:
-            st.error("⚠️ API limit reached. Wait 60 seconds.")
-        except Exception as e:
-            st.error(f"Error: {e}")
+# --- 5. OUTPUT ---
+if st.session_state.res_text:
+    st.divider()
+    t1, t2 = st.tabs(["🍏 Meal Plan", "📈 Extracted Lab Data"])
+    with t1: st.markdown(st.session_state.res_text)
+    with t2: st.code(st.session_state.raw_text)
