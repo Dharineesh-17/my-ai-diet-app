@@ -81,6 +81,40 @@ def sync_dashboard_from_file(file):
         st.warning("Could not find all vitals in the report. Please check the boxes manually.")
 
 # --- 3. SIDEBAR ---
+from fpdf import FPDF
+
+def create_sample_report():
+    pdf = FPDF()
+    pdf.add_page()
+    
+    # Header
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, txt="METRO CARE DIAGNOSTICS", ln=True, align='C')
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="Official Clinical Laboratory Report", ln=True, align='C')
+    pdf.ln(10)
+    
+    # Vitals Section
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(200, 10, txt="PATIENT VITALS:", ln=True)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="- Weight: 92.5 kg", ln=True)
+    pdf.cell(200, 10, txt="- Height: 180 cm", ln=True)
+    pdf.cell(200, 10, txt="- Age: 45 years", ln=True)
+    pdf.ln(5)
+    
+    # Lab Results
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(200, 10, txt="LABORATORY RESULTS:", ln=True)
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 10, txt="Blood Glucose: 115 mg/dL (Elevated)\nLDL Cholesterol: 155 mg/dL (High)\nTriglycerides: 170 mg/dL")
+    
+    # Save the file
+    pdf.output("sample_clinical_report.pdf")
+    print("Success: sample_clinical_report.pdf has been created!")
+
+create_sample_report()
+
 with st.sidebar:
     st.markdown("### 📂 1. Clinical Input")
     uploaded_file = st.file_uploader("Upload Lab Report/Screenshot", type=["pdf", "png", "jpg", "jpeg"])
