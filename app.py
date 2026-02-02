@@ -21,9 +21,9 @@ st.markdown("""
 
         color: #000000 !important;
 
-        border-radius: 0 0 15px 15px !important;
+        border-radius: 0 0 30px 30px !important;
 
-        padding: 3px !important;
+        padding: 25px !important;
 
         border: 1px solid #e0e0e0 !important;
 
