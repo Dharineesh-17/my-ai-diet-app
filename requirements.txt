@@ -60,3 +60,7 @@ uritemplate==4.2.0
 urllib3==2.6.3
 watchdog==6.0.0
 pillow
+groq
+PyPDF2
+ pytesseract
+easyocr
