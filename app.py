@@ -7,7 +7,7 @@ from groq import Groq
 from PIL import Image
 
 # --- 1. PREMIUM UI & STATE ENGINE ---
-st.set_page_config(page_title="NutriCare AI Pro", layout="wide")
+st.set_page_config(page_title="AI Based Diet Plan Genertor", layout="wide")
 
 # Initialize Session State values
 for key, val in {'w': 70.0, 'h': 175.0, 'a': 25, 'res_text': "", 'raw_text': ""}.items():
