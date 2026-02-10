@@ -145,6 +145,9 @@ if prompt := st.chat_input("Ask me about your meal plan or lab results..."):
     context = f"User Vitals: Weight {st.session_state.w}kg, Height {st.session_state.h}cm, Age {st.session_state.a}."
     
     # 4. Generate AI Response using Groq
+    import groq
+# Add this near the top of your file (after your imports)
+client = groq.Groq(api_key="YOUR_GROQ_API_KEY")
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
