@@ -3,8 +3,7 @@ import json
 import numpy as np
 import easyocr
 import PyPDF2
-from groq 
-import Groq
+from groq import Groq
 from PIL import Image
 
 # --- 1. PREMIUM UI & STATE ENGINE ---
