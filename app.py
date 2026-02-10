@@ -124,10 +124,22 @@ with st.container():
                 status.update(label="✅ Analysis Complete!", state="complete")
       
 
-# 1. Initialize the client (Fixes NameError)
+# 1. SETUP: Initialize Groq with your key
+# Best for Slide 2: Technical Architecture
 client = groq.Groq(api_key="YOUR_GROQ_API_KEY")
 
-# --- CHATBOT SECTION ---
+# 2. RAG CONTEXT: Pull data from your extraction state
+# Best for Slide 1: Clinical Alignment
+patient_data = {
+    "Weight": st.session_state.get('w', 'Unknown'),
+    "Height": st.session_state.get('h', 'Unknown'),
+    "Age": st.session_state.get('a', 'Unknown'),
+    "Diet": st.session_state.get('diet_type', 'General')
+}
+
+# 3. CHAT INTERFACE
+st.title("🩺 Clinical Assistant (RAG Enabled)")
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -135,21 +147,30 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("Ask me about your diet..."):
-    st.chat_message("user").markdown(prompt)
+if prompt := st.chat_input("Ask about your personalized plan..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # 4. INFERENCE: The Brain
+    # Using Llama-3 for rapid inference as per your architecture
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
-            {"role": "system", "content": "You are a clinical nutritionist."},
+            {
+                "role": "system", 
+                "content": f"You are a Clinical Nutritionist. CONTEXT: {patient_data}. "
+                           "Instructions: Only give advice aligned with these metrics. "
+                           "If data is 'Unknown', ask the user to upload a report."
+            },
             *st.session_state.messages
         ]
     )
     
-    msg = response.choices[0].message.content
+    answer = response.choices[0].message.content
     with st.chat_message("assistant"):
-        st.markdown(msg)
-    st.session_state.messages.append({"role": "assistant", "content": msg})
+        st.markdown(answer)
+    st.session_state.messages.append({"role": "assistant", "content": answer})
 
 # --- 5. OUTPUT EXPERIENCE ---
 if st.session_state.res_text:
