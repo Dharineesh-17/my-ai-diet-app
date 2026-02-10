@@ -3,7 +3,8 @@ import json
 import numpy as np
 import easyocr
 import PyPDF2
-from groq import Groq
+from groq 
+import Groq
 from PIL import Image
 
 # --- 1. PREMIUM UI & STATE ENGINE ---
@@ -140,6 +141,9 @@ if prompt := st.chat_input("Ask me about your diet..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     # 2. Fixes IndentationError (Ensure this is indented once!)
+# Initialize the client correctly
+# Make sure you have 'groq' in your requirements.txt file!
+client = groq.Groq(api_key=st.secrets["GROQ_API_KEY"])
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
