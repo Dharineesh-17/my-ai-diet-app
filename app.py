@@ -122,46 +122,37 @@ with st.container():
                 chat = client.chat.completions.create(messages=[{"role": "user", "content": prompt}], model=model_choice)
                 st.session_state.res_text = chat.choices[0].message.content
                 status.update(label="✅ Analysis Complete!", state="complete")
-                # --- CHATBOT SECTION ---
-st.divider()
-st.subheader("💬 Chat with your Personal Nutritionist")
+          import groq
+import streamlit as st
 
-# 1. Initialize chat history in Session State
+# 1. Initialize the client (Fixes NameError)
+client = groq.Groq(api_key="YOUR_GROQ_API_KEY")
+
+# --- CHATBOT SECTION ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 2. Display chat messages from history on app rerun
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 3. React to user input
-if prompt := st.chat_input("Ask me about your meal plan or lab results..."):
-    # Display user message in chat message container
+if prompt := st.chat_input("Ask me about your diet..."):
     st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Prepare context from extracted vitals
-    context = f"User Vitals: Weight {st.session_state.w}kg, Height {st.session_state.h}cm, Age {st.session_state.a}."
-    
-    # 4. Generate AI Response using Groq
-    import groq
-# Add this near the top of your file (after your imports)
-client = groq.Groq(api_key="YOUR_GROQ_API_KEY")
+    # 2. Fixes IndentationError (Ensure this is indented once!)
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
-            {"role": "system", "content": f"You are a clinical nutritionist. Use this context: {context}. Be professional and brief."},
+            {"role": "system", "content": "You are a clinical nutritionist."},
             *st.session_state.messages
         ]
     )
     
-    full_response = response.choices[0].message.content
-    
-    # Display assistant response
+    msg = response.choices[0].message.content
     with st.chat_message("assistant"):
-        st.markdown(full_response)
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+        st.markdown(msg)
+    st.session_state.messages.append({"role": "assistant", "content": msg})
 
 # --- 5. OUTPUT EXPERIENCE ---
 if st.session_state.res_text:
