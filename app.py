@@ -138,11 +138,6 @@ for message in st.session_state.messages:
 if prompt := st.chat_input("Ask me about your diet..."):
     st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
-
-    # 2. Fixes IndentationError (Ensure this is indented once!)
-# Initialize the client correctly
-# Make sure you have 'groq' in your requirements.txt file!
-client = groq.Groq(api_key=st.secrets["GROQ_API_KEY"])
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
