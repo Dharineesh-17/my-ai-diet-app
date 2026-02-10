@@ -122,8 +122,7 @@ with st.container():
                 chat = client.chat.completions.create(messages=[{"role": "user", "content": prompt}], model=model_choice)
                 st.session_state.res_text = chat.choices[0].message.content
                 status.update(label="✅ Analysis Complete!", state="complete")
-          import groq
-import streamlit as st
+      
 
 # 1. Initialize the client (Fixes NameError)
 client = groq.Groq(api_key="YOUR_GROQ_API_KEY")
