@@ -93,7 +93,17 @@ with tab1:
 
     if st.session_state.res_text:
         st.markdown("---")
-        st.markdown(st.session_state.res_text)
+        st.markdown("### 📋 Generated Nutrition Prescription")
+        st.info(st.session_state.res_text)
+        
+        # --- NEW: DOWNLOAD OPTION ---
+        st.download_button(
+            label="📥 Download Clinical Diet Plan",
+            data=st.session_state.res_text,
+            file_name=f"Diet_Plan_{age}y_{goal}.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
 
 # --- TAB 2: CHATBOT ---
 with tab2:
