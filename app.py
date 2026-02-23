@@ -5,134 +5,151 @@ import easyocr
 import PyPDF2
 from groq import Groq
 from PIL import Image
+import base64
 
-# --- 1. PREMIUM UI & STATE ENGINE ---
-st.set_page_config(page_title="AI Based Diet Plan Generator", layout="wide")
+# --- 1. EXTRAORDINARY UI & THEME ENGINE ---
+st.set_page_config(page_title="NEURO-DIET | Clinical AI", layout="wide", page_icon="🧪")
 
-# Persistent memory for cross-tab communication
+# Custom CSS for Glassmorphism & Premium Medical Look
+st.markdown("""
+    <style>
+    /* Main Background */
+    .stApp {
+        background: radial-gradient(circle at top right, #0e1525, #000000);
+    }
+    
+    /* Glassmorphism Cards */
+    div[data-testid="stVerticalBlock"] > div:has(div.stMetric) {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Professional Button Styling */
+    .stButton>button {
+        border-radius: 12px;
+        background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+        color: black;
+        font-weight: bold;
+        border: none;
+        transition: 0.3s;
+    }
+    .stButton>button:hover {
+        transform: scale(1.02);
+        box-shadow: 0px 0px 20px rgba(79, 172, 254, 0.4);
+    }
+
+    /* Custom Chat Styling */
+    .stChatMessage {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border-radius: 15px !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Initialize Session State
 for key, val in {'w': 70.0, 'h': 175.0, 'a': 25, 'res_text': "", 'raw_text': "", 'messages': []}.items():
     if key not in st.session_state:
         st.session_state[key] = val
 
-# --- 2. EXTRACTION ENGINE ---
+# --- 2. CORE ENGINES (OCR & AI) ---
 @st.cache_resource
 def load_ocr():
     return easyocr.Reader(['en'])
 
-def sync_dashboard_from_file(file):
+def process_file(file):
     if file.type == "application/pdf":
         reader = PyPDF2.PdfReader(file)
         text = " ".join([p.extract_text() for p in reader.pages])
     else:
         reader = load_ocr()
         text = " ".join([res[1] for res in reader.readtext(np.array(Image.open(file)))])
-    
     st.session_state.raw_text = text
     
     try:
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-        sync_prompt = f"Extract weight(kg), height(cm), age from text: '{text}'. Return ONLY JSON: {{\"w\":num, \"h\":num, \"a\":num}}"
         resp = client.chat.completions.create(
-            messages=[{"role": "user", "content": sync_prompt}],
+            messages=[{"role": "user", "content": f"Extract weight, height, age from: '{text}'. Return JSON: {{\"w\":num, \"h\":num, \"a\":num}}"}],
             model="llama-3.1-8b-instant",
             response_format={"type": "json_object"}
         )
-        vitals = json.loads(resp.choices[0].message.content)
-        st.session_state.w = max(30.0, min(200.0, float(vitals.get('w', st.session_state.w))))
-        st.session_state.h = max(100.0, min(250.0, float(vitals.get('h', st.session_state.h))))
-        st.session_state.a = max(1, min(120, int(vitals.get('a', st.session_state.a))))
-    except Exception as e:
-        st.warning(f"Extraction Note: {e}")
+        v = json.loads(resp.choices[0].message.content)
+        st.session_state.update({'w': float(v.get('w', 70)), 'h': float(v.get('h', 175)), 'a': int(v.get('a', 25))})
+    except: st.toast("Manual check required for vitals.")
 
-# --- 3. SIDEBAR (Global Settings) ---
+# --- 3. SIDEBAR COMMAND CENTER ---
 with st.sidebar:
-    st.title("📂 Control Center")
-    uploaded_file = st.file_uploader("Upload Lab Report", type=["pdf", "png", "jpg", "jpeg"])
-    if uploaded_file and st.button("🔍 Sync Clinical Data"):
-        with st.status("🧬 Analyzing Data...") as s:
-            sync_dashboard_from_file(uploaded_file)
-            s.update(label="✅ Data Synced!", state="complete")
+    st.image("https://cdn-icons-png.flaticon.com/512/3063/3063067.png", width=80)
+    st.title("NEURO-DIET v2.0")
+    st.caption("Advanced Clinical Intelligence")
+    
+    upload = st.file_uploader("Upload Lab Diagnostics", type=["pdf", "png", "jpg"])
+    if upload and st.button("🧬 INGEST DATA"):
+        with st.status("Parsing Bio-Markers..."):
+            process_file(upload)
     
     st.divider()
-    model_choice = st.selectbox("LLM Engine", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
-    if st.button("🗑️ Reset All Sessions"):
-        st.session_state.messages = []
-        st.session_state.res_text = ""
+    m_choice = st.selectbox("Intelligence Core", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
+    if st.button("🔄 Reset Environment"):
+        st.session_state.update({'messages': [], 'res_text': ""})
         st.rerun()
 
-# --- 4. NAVIGATION SEPARATION ---
-st.title("🥗 AI Clinical Intelligence System")
-tab1, tab2 = st.tabs(["📊 Patient Dashboard & Report", "💬 Clinical AI Chatbot"])
+# --- 4. MAIN INTERFACE ---
+st.title("🧪 Clinical Intelligence Dashboard")
 
-# --- TAB 1: DATA & GENERATION ---
+# Glassmorphism Vitals Row
+c1, c2, c3, c4 = st.columns(4)
+w = c1.number_input("Weight (kg)", 30.0, 200.0, key="w")
+h = c2.number_input("Height (cm)", 100.0, 250.0, key="h")
+age = c3.number_input("Age", 1, 120, key="a")
+bmi = w / ((h/100)**2)
+c4.metric("Live BMI", f"{bmi:.1f}", "Healthy" if 18.5 <= bmi <= 25 else "Warning")
+
+# Layout Split
+tab1, tab2 = st.tabs(["📊 Diagnostic Report", "💬 Neural Consultation"])
+
 with tab1:
-    st.markdown("### 🩺 Verify Patient Vitals")
-    v1, v2, v3, v4 = st.columns(4)
-    weight = v1.number_input("Weight (kg)", 30.0, 200.0, key="w")
-    height = v2.number_input("Height (cm)", 100.0, 250.0, key="h")
-    age = v3.number_input("Age", 1, 120, key="a")
-    with v4:
-        bmi = weight / ((height/100)**2)
-        st.metric("Live BMI", f"{bmi:.1f}", "Healthy" if 18.5 <= bmi <= 25 else "Attention Required")
-
-    c1, c2 = st.columns(2)
-    with c1: culture = st.multiselect("Dietary Culture", ["South Indian", "North Indian", "Keto", "Mediterranean"], default=["South Indian"])
-    with c2: goal = st.select_slider("Clinical Goal", options=["Loss", "Maintain", "Muscle"])
-
-    if st.button("🚀 GENERATE NUTRITION REPORT", use_container_width=True):
-        if not st.session_state.raw_text and not uploaded_file:
-            st.error("Please upload a report first.")
-        else:
-            with st.spinner("Analyzing Clinical Markers..."):
-                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                prompt = f"Dietitian: Analyze this lab data: {st.session_state.raw_text}. Create {goal} plan for {age}y, {weight}kg ({culture})."
-                chat = client.chat.completions.create(messages=[{"role": "user", "content": prompt}], model=model_choice)
-                st.session_state.res_text = chat.choices[0].message.content
-                st.session_state.messages.append({"role": "assistant", "content": f"**System:** Initial Plan Generated."})
-                st.success("Report Generated! Move to the Chatbot tab for discussion.")
+    col_a, col_b = st.columns([2, 1])
+    with col_a:
+        culture = st.multiselect("Dietary Culture", ["South Indian", "North Indian", "Keto", "Paleo"], default=["South Indian"])
+    with col_b:
+        goal = st.select_slider("Metabolic Goal", options=["Loss", "Maintain", "Muscle"])
+    
+    if st.button("🚀 SYNTHESIZE NUTRITION PLAN", use_container_width=True):
+        with st.spinner("Aligning Clinical Parameters..."):
+            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+            p = f"Analyze: {st.session_state.raw_text}. Create {goal} plan for {age}y, {w}kg ({culture}). Format: Professional Medical Report."
+            resp = client.chat.completions.create(messages=[{"role": "user", "content": p}], model=m_choice)
+            st.session_state.res_text = resp.choices[0].message.content
+            st.session_state.messages.append({"role": "assistant", "content": "Report Synthesized Successfully."})
 
     if st.session_state.res_text:
-        st.markdown("---")
-        st.markdown("### 📋 Generated Nutrition Prescription")
+        st.markdown("### 📋 Bio-Aligned Prescription")
         st.info(st.session_state.res_text)
         
-        # --- NEW: DOWNLOAD OPTION ---
-        st.download_button(
-            label="📥 Download Clinical Diet Plan",
-            data=st.session_state.res_text,
-            file_name=f"Diet_Plan_{age}y_{goal}.txt",
-            mime="text/plain",
-            use_container_width=True
-        )
+        # Download Action
+        st.download_button("📥 EXPORT MEDICAL REPORT", st.session_state.res_text, f"Report_{age}.txt", "text/plain")
 
-# --- TAB 2: CHATBOT ---
 with tab2:
     if not st.session_state.res_text:
-        st.info("⚠️ Please generate a report in the first tab to start the consultation.")
+        st.warning("Awaiting Diagnostic Report Synthesis...")
     else:
-        st.markdown("### 💬 Clinical Consultation")
-        
-        # Display chat history
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
+        for m in st.session_state.messages:
+            with st.chat_message(m["role"]): st.markdown(m["content"])
 
-        # Chat Input
-        if user_input := st.chat_input("Ask about swaps, allergies, or clinical values..."):
-            st.session_state.messages.append({"role": "user", "content": user_input})
-            with st.chat_message("user"):
-                st.markdown(user_input)
+        if prompt := st.chat_input("Ask about specific markers..."):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"): st.markdown(prompt)
 
             with st.chat_message("assistant"):
                 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                system_context = f"""
-                You are a Clinical Nutritionist. Base answers strictly on this report: {st.session_state.res_text}.
-                Patient: {age}y, {weight}kg, Goal: {goal}. Ensure medical safety.
-                """
-                chat_completion = client.chat.completions.create(
-                    messages=[{"role": "system", "content": system_context}, *st.session_state.messages],
-                    model=model_choice,
+                ctx = f"Context: {st.session_state.res_text}. Patient: {age}y, {w}kg. Be clinical."
+                resp = client.chat.completions.create(
+                    messages=[{"role": "system", "content": ctx}, *st.session_state.messages],
+                    model=m_choice
                 )
-                response = chat_completion.choices[0].message.content
-                st.markdown(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
+                st.markdown(resp.choices[0].message.content)
+                st.session_state.messages.append({"role": "assistant", "content": resp.choices[0].message.content})
