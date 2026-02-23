@@ -7,7 +7,7 @@ from groq import Groq
 from PIL import Image
 
 # --- 1. QUANTUM UI: ARCHITECTURAL SUPREMACY ---
-st.set_page_config(page_title="NEURO-DIET | Quantum HUD", layout="wide", page_icon="🔮")
+st.set_page_config(page_title="🥗AI-BASED DIET PLAN GENERATOR", layout="wide", page_icon="🔮")
 
 # PROVING UI SUPREMACY: High-End CSS Injection
 st.markdown("""
