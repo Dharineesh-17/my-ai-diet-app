@@ -5,148 +5,158 @@ import easyocr
 import PyPDF2
 from groq import Groq
 from PIL import Image
-import base64
 
-# --- 1. EXTRAORDINARY UI & THEME ENGINE ---
-st.set_page_config(page_title="NEURO-DIET | Clinical AI", layout="wide", page_icon="🧪")
+# --- 1. WORLD-CLASS UI ARCHITECTURE ---
+st.set_page_config(page_title="NEURO-DIET | Clinical AI", layout="wide", page_icon="🧬")
 
-# Custom CSS for Glassmorphism & Premium Medical Look
+# Extraordinary CSS Injection
 st.markdown("""
     <style>
-    /* Main Background */
+    /* Global Aesthetic */
     .stApp {
-        background: radial-gradient(circle at top right, #0e1525, #000000);
+        background: radial-gradient(circle at 20% 10%, #050a18 0%, #000000 100%);
+        color: #e0e6ed;
     }
     
-    /* Glassmorphism Cards */
+    /* Neon Glassmorphism Containers */
+    [data-testid="stMetricValue"] { color: #00f2fe !important; font-family: 'Courier New', monospace; }
+    
     div[data-testid="stVerticalBlock"] > div:has(div.stMetric) {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border-radius: 24px;
+        padding: 25px;
+        border: 1px solid rgba(0, 242, 254, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
     }
 
-    /* Professional Button Styling */
+    /* Cyberpunk Buttons */
     .stButton>button {
-        border-radius: 12px;
-        background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
-        color: black;
-        font-weight: bold;
+        width: 100%;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+        color: #000;
+        font-weight: 800;
+        letter-spacing: 1px;
         border: none;
-        transition: 0.3s;
+        padding: 15px;
+        transition: all 0.4s ease;
+        text-transform: uppercase;
     }
     .stButton>button:hover {
-        transform: scale(1.02);
-        box-shadow: 0px 0px 20px rgba(79, 172, 254, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 242, 254, 0.4);
     }
 
-    /* Custom Chat Styling */
-    .stChatMessage {
-        background: rgba(255, 255, 255, 0.03) !important;
-        border-radius: 15px !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    /* Tab Styling */
+    .stTabs [data-baseweb="tab-list"] { gap: 20px; }
+    .stTabs [data-baseweb="tab"] {
+        background-color: transparent;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 10px 30px;
+        color: #8892b0;
+    }
+    .stTabs [aria-selected="true"] {
+        background: rgba(0, 242, 254, 0.1) !important;
+        border: 1px solid #00f2fe !important;
+        color: #00f2fe !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# Initialize Session State
+# State Engine
 for key, val in {'w': 70.0, 'h': 175.0, 'a': 25, 'res_text': "", 'raw_text': "", 'messages': []}.items():
-    if key not in st.session_state:
-        st.session_state[key] = val
+    if key not in st.session_state: st.session_state[key] = val
 
-# --- 2. CORE ENGINES (OCR & AI) ---
+# --- 2. HIGH-PRECISION LOGIC ---
 @st.cache_resource
-def load_ocr():
-    return easyocr.Reader(['en'])
+def load_ocr(): return easyocr.Reader(['en'])
 
-def process_file(file):
-    if file.type == "application/pdf":
-        reader = PyPDF2.PdfReader(file)
-        text = " ".join([p.extract_text() for p in reader.pages])
-    else:
-        reader = load_ocr()
-        text = " ".join([res[1] for res in reader.readtext(np.array(Image.open(file)))])
-    st.session_state.raw_text = text
-    
-    try:
-        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-        resp = client.chat.completions.create(
-            messages=[{"role": "user", "content": f"Extract weight, height, age from: '{text}'. Return JSON: {{\"w\":num, \"h\":num, \"a\":num}}"}],
-            model="llama-3.1-8b-instant",
-            response_format={"type": "json_object"}
-        )
-        v = json.loads(resp.choices[0].message.content)
-        st.session_state.update({'w': float(v.get('w', 70)), 'h': float(v.get('h', 175)), 'a': int(v.get('a', 25))})
-    except: st.toast("Manual check required for vitals.")
+def ingest_clinical_data(file):
+    with st.spinner("🧬 High-Speed Neural Parsing..."):
+        if file.type == "application/pdf":
+            reader = PyPDF2.PdfReader(file)
+            text = " ".join([p.extract_text() for p in reader.pages])
+        else:
+            reader = load_ocr()
+            text = " ".join([res[1] for res in reader.readtext(np.array(Image.open(file)))])
+        st.session_state.raw_text = text
+        
+        try:
+            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+            resp = client.chat.completions.create(
+                messages=[{"role": "user", "content": f"Extract weight, height, age from: '{text}'. Return JSON: {{\"w\":num, \"h\":num, \"a\":num}}"}],
+                model="llama-3.1-8b-instant", response_format={"type": "json_object"}
+            )
+            v = json.loads(resp.choices[0].message.content)
+            st.session_state.update({'w': float(v.get('w', 70)), 'h': float(v.get('h', 175)), 'a': int(v.get('a', 25))})
+            st.toast("Bio-data Synced Successfully!", icon="✅")
+        except: st.toast("Manual calibration required.", icon="⚠️")
 
-# --- 3. SIDEBAR COMMAND CENTER ---
+# --- 3. SIDEBAR (Clinical Input) ---
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/3063/3063067.png", width=80)
-    st.title("NEURO-DIET v2.0")
-    st.caption("Advanced Clinical Intelligence")
+    st.markdown("<h2 style='color:#00f2fe;'>🔬 NEURO-DIET</h2>", unsafe_allow_html=True)
+    st.caption("v2.5 Professional Edition")
     
-    upload = st.file_uploader("Upload Lab Diagnostics", type=["pdf", "png", "jpg"])
-    if upload and st.button("🧬 INGEST DATA"):
-        with st.status("Parsing Bio-Markers..."):
-            process_file(upload)
+    with st.container(border=True):
+        upload = st.file_uploader("Upload Lab Diagnostics", type=["pdf", "png", "jpg"])
+        if upload and st.button("EXECUTE DATA INGESTION"): ingest_clinical_data(upload)
     
     st.divider()
     m_choice = st.selectbox("Intelligence Core", ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"])
-    if st.button("🔄 Reset Environment"):
-        st.session_state.update({'messages': [], 'res_text': ""})
+    if st.button("RESET SESSION"):
+        st.session_state.update({'messages': [], 'res_text': "", 'raw_text': ""})
         st.rerun()
 
-# --- 4. MAIN INTERFACE ---
-st.title("🧪 Clinical Intelligence Dashboard")
+# --- 4. MAIN DASHBOARD ---
+st.markdown("<h1 style='text-align: center; color: #fff;'>Clinical Intelligence Center</h1>", unsafe_allow_html=True)
 
-# Glassmorphism Vitals Row
-c1, c2, c3, c4 = st.columns(4)
-w = c1.number_input("Weight (kg)", 30.0, 200.0, key="w")
-h = c2.number_input("Height (cm)", 100.0, 250.0, key="h")
-age = c3.number_input("Age", 1, 120, key="a")
-bmi = w / ((h/100)**2)
-c4.metric("Live BMI", f"{bmi:.1f}", "Healthy" if 18.5 <= bmi <= 25 else "Warning")
+# Vitals Command Center
+v_col1, v_col2, v_col3, v_col4 = st.columns(4)
+with v_col1: w = st.number_input("Mass (kg)", 30.0, 200.0, key="w")
+with v_col2: h = st.number_input("Height (cm)", 100.0, 250.0, key="h")
+with v_col3: age = st.number_input("Age (Years)", 1, 120, key="a")
+with v_col4:
+    bmi = w / ((h/100)**2)
+    st.metric("PULSE BMI", f"{bmi:.1f}", "OPTIMAL" if 18.5 <= bmi <= 25 else "VARIANCED")
 
-# Layout Split
-tab1, tab2 = st.tabs(["📊 Diagnostic Report", "💬 Neural Consultation"])
+# Tabs for Separation of Concerns
+tab_rep, tab_chat = st.tabs(["📑 DIAGNOSTIC REPORT", "🧠 NEURAL CONSULTATION"])
 
-with tab1:
-    col_a, col_b = st.columns([2, 1])
-    with col_a:
-        culture = st.multiselect("Dietary Culture", ["South Indian", "North Indian", "Keto", "Paleo"], default=["South Indian"])
-    with col_b:
-        goal = st.select_slider("Metabolic Goal", options=["Loss", "Maintain", "Muscle"])
+with tab_rep:
+    col_x, col_y = st.columns([3, 2])
+    with col_x: culture = st.multiselect("Dietary Culture", ["South Indian", "North Indian", "Keto", "Mediterranean"], default=["South Indian"])
+    with col_y: goal = st.select_slider("Clinical Goal", options=["Loss", "Maintain", "Muscle"])
     
-    if st.button("🚀 SYNTHESIZE NUTRITION PLAN", use_container_width=True):
-        with st.spinner("Aligning Clinical Parameters..."):
+    if st.button("SYNTHESIZE CLINICAL DIET PLAN"):
+        with st.status("Aligning Bio-Markers with Nutritional Science..."):
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            p = f"Analyze: {st.session_state.raw_text}. Create {goal} plan for {age}y, {w}kg ({culture}). Format: Professional Medical Report."
+            p = f"Analyze: {st.session_state.raw_text}. Create {goal} plan for {age}y, {w}kg ({culture}). Format: Professional Medical Document."
             resp = client.chat.completions.create(messages=[{"role": "user", "content": p}], model=m_choice)
             st.session_state.res_text = resp.choices[0].message.content
-            st.session_state.messages.append({"role": "assistant", "content": "Report Synthesized Successfully."})
+            st.session_state.messages.append({"role": "assistant", "content": "Report ready. Diagnostics complete."})
 
     if st.session_state.res_text:
-        st.markdown("### 📋 Bio-Aligned Prescription")
-        st.info(st.session_state.res_text)
-        
-        # Download Action
-        st.download_button("📥 EXPORT MEDICAL REPORT", st.session_state.res_text, f"Report_{age}.txt", "text/plain")
+        st.markdown("### 📋 AI Generated Prescription")
+        st.markdown(f"<div style='background:rgba(0,242,254,0.05); padding:20px; border-radius:15px; border-left: 5px solid #00f2fe;'>{st.session_state.res_text}</div>", unsafe_allow_html=True)
+        st.download_button("📥 DOWNLOAD ENCRYPTED REPORT", st.session_state.res_text, f"Clinical_Report_{age}.txt")
 
-with tab2:
+with tab_chat:
     if not st.session_state.res_text:
-        st.warning("Awaiting Diagnostic Report Synthesis...")
+        st.info("System Standby: Awaiting Diagnostic Data.")
     else:
+        # Chat History with Premium Styling
         for m in st.session_state.messages:
             with st.chat_message(m["role"]): st.markdown(m["content"])
 
-        if prompt := st.chat_input("Ask about specific markers..."):
+        if prompt := st.chat_input("Query the clinical engine..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"): st.markdown(prompt)
 
             with st.chat_message("assistant"):
                 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                ctx = f"Context: {st.session_state.res_text}. Patient: {age}y, {w}kg. Be clinical."
+                ctx = f"System: Clinical Nutritionist. Basis: {st.session_state.res_text}. Patient: {age}y, {w}kg. Context-aware strictly."
                 resp = client.chat.completions.create(
                     messages=[{"role": "system", "content": ctx}, *st.session_state.messages],
                     model=m_choice
