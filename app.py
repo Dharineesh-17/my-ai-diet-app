@@ -120,7 +120,7 @@ hud4.metric("SYSTEM LOAD", "MODERATE", delta="Optimal AI", delta_color="normal")
 
 
 
-[Image of the human digestive system]
+#[Image of the human digestive system]
 
 
 st.divider()
