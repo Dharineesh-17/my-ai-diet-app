@@ -1,37 +1,27 @@
-# 🥗 AI-Based Diet Plan Generator
+# 🥗 AI BAESED-DIET PLAN GENERATOR | Clinical AI Engine
+**Next-Gen Precision Nutrition & Automated Lab Analytics**
 
-A clinical nutrition assistant powered by Groq LLMs. Upload lab reports or medical scans, auto-sync patient vitals, and generate personalized diet plans with a real-time RAG chatbot for follow-up queries.
+![Python](https://img.shields.io/badge/Python-3.9+-blue?style=for-the-badge&logo=python)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)
+![Groq](https://img.shields.io/badge/Inference-Groq_Cloud-1D9E75?style=for-the-badge)
+![LLM](https://img.shields.io/badge/LLM-Llama_3.3_70B-orange?style=for-the-badge)
 
 ---
 
-<details>
-<summary><b>📁 Project structure</b></summary>
+## 🚀 Overview
+An intelligent clinical assistant that bridges the gap between raw medical data and actionable nutrition. **NEURO-DIET** automates the extraction of patient vitals from lab reports and generates hyper-personalized diet protocols using RAG-enhanced LLMs.
 
-| File | Description |
-| :--- | :--- |
-| `app.py` | Main Streamlit UI — dashboard, OCR sync, chatbot |
-| `ai_engine.py` | Standalone Gemini test script |
-| `nutrition_logic.py` | BMR / TDEE calculation utilities |
-| `requirements.txt` | All Python dependencies |
+*   **Clinical OCR Sync:** Instant extraction of BMI, glucose, and lipid markers.
+*   **Agentic RAG Chatbot:** Context-aware Q&A based on the generated nutrition report.
+*   **Dynamic BMR/TDEE Engine:** Real-time metabolic calculations using Mifflin-St Jeor logic.
 
-</details>
+---
 
-<details>
-<summary><b>⚡ Quick start</b></summary>
-
-1. **Clone the repo:** `git clone https://github.com/your-username/ai-diet-plan-generator.git && cd ai-diet-plan-generator`
-2. **Install dependencies:** `pip install -r requirements.txt`
-3. **Setup Secrets:** Create `.streamlit/secrets.toml` and add your Groq API key.
-4. **Run:** `streamlit run app.py`
-
-</details>
-
-<details>
-<summary><b>🛠️ Tech stack</b></summary>
-
-* **Streamlit**: UI framework
-* **Groq API**: LLM inference (LLaMA 3.3 70B)
-* **EasyOCR**: Text extraction from image lab reports
-* **PyPDF2**: PDF text extraction
-
-</details>
+## 🏗️ System Architecture
+```mermaid
+graph LR
+    A[Lab Report / PDF] --> B{OCR Engine}
+    B -->|Extract Vitals| C[Logic Engine]
+    C -->|BMR / TDEE| D[Groq Llama 3.3]
+    D -->|Gen AI| E[Personalized Diet Plan]
+    E --> F[RAG Chatbot Interface]
