@@ -9,7 +9,7 @@
 ---
 
 ## 🚀 Overview
-An intelligent clinical assistant that bridges the gap between raw medical data and actionable nutrition. **NEURO-DIET** automates the extraction of patient vitals from lab reports and generates hyper-personalized diet protocols using RAG-enhanced LLMs.
+An intelligent clinical assistant that bridges the gap between raw medical data and actionable nutrition. **AI BAESED-DIET PLAN GENERATOR** automates the extraction of patient vitals from lab reports and generates hyper-personalized diet protocols using RAG-enhanced LLMs.
 
 *   **Clinical OCR Sync:** Instant extraction of BMI, glucose, and lipid markers.
 *   **Agentic RAG Chatbot:** Context-aware Q&A based on the generated nutrition report.
